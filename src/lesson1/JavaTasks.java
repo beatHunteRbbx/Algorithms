@@ -2,6 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -35,8 +38,97 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortTimes(String inputName, String outputName) {
-        throw new NotImplementedError();
+        //        throw new NotImplementedError();
+        try {
+            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
+            String line;  //сюда будет помещаться считываемая строка
+            List<String> timeArrayList = new ArrayList<>();  //сюда будут помещаться строки из файла
+            List<Integer> translatedTimeList = new ArrayList<>(); //список для отсортированных секунд
+            //считываем строки в файле пока они есть
+            while (inputFileReader.ready()) {
+                line = inputFileReader.readLine();
+                timeArrayList.add(line);
+            }
+
+            //переводим время в каждой строке файла в секунды
+            for (String time : timeArrayList) translatedTimeList.add(translateTimeToSeconds(time));
+
+            //сортируем секунды с помощью insertion sort
+            for (int j = 1; j < translatedTimeList.size(); j++) {
+                int comparableTime = translatedTimeList.get(j);
+                int i = j - 1;
+                while (i >= 0 && translatedTimeList.get(i) > comparableTime) {
+                    translatedTimeList.set(i + 1, translatedTimeList.get(i));
+                    i--;
+                }
+                translatedTimeList.set(i + 1, comparableTime);
+            }
+
+            //очищаем старый списсок и помещаем туда отсортированные секунды, переведенные в 12-часовой формат
+            timeArrayList.clear();
+            for (Integer time : translatedTimeList) timeArrayList.add(translateSecondsToTime(time));
+
+            //создаем файл
+            createFileFromStringArray(timeArrayList, outputName);
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+            //        throw new NotImplementedError();
+        }
     }
+
+    //----------------------------------вспомогательные функции для sortTimes()-----------------------------------------
+    private static int translateTimeToSeconds(String time) {
+        int answerSeconds = 0;
+
+        int hour = Integer.parseInt(time.split(" ")[0].split(":")[0]);
+        int minutes = Integer.parseInt(time.split(" ")[0].split(":")[1]);
+        int seconds = Integer.parseInt(time.split(" ")[0].split(":")[2]);
+        String moon = time.split(" ")[1];
+
+        if (moon.equalsIgnoreCase("pm")) answerSeconds += 12 * 3600;
+        if (hour == 12) hour = 0;
+        answerSeconds =  answerSeconds +
+                        hour * 3600 +
+                        minutes * 60 +
+                        seconds;
+
+        return answerSeconds;
+    }
+
+    private static String translateSecondsToTime(int time) {
+        StringBuilder answerTime = new StringBuilder();
+        String answerMoon = "AM";
+        int hour = Math.round(time / 3600);
+        int minutes = Math.round((time - (hour * 3600)) / 60);
+        int seconds = Math.round(time - (hour * 3600) - (minutes * 60));
+        if (hour >= 12) {
+            answerMoon = "PM";
+            hour -= 12;
+        }
+
+        String answerHour = Integer.toString(hour);
+        String answerMinutes = Integer.toString(minutes);
+        String answerSeconds = Integer.toString(seconds);
+
+        if (hour == 0) answerHour = "12";
+        else if (hour < 10) answerHour = "0" + hour;
+        if (minutes < 10) answerMinutes = "0" + minutes;
+        if (seconds < 10) answerSeconds = "0" + seconds;
+
+
+        answerTime.append(answerHour);
+        answerTime.append(":");
+        answerTime.append(answerMinutes);
+        answerTime.append(":");
+        answerTime.append(answerSeconds);
+        answerTime.append(" ");
+        answerTime.append(answerMoon);
+
+        return answerTime.toString();
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
 
     /**
      * Сортировка адресов
@@ -65,9 +157,114 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) {
-        throw new NotImplementedError();
+//        throw new NotImplementedError();
+
+        //суть:
+        //переводим 1ые буквы адресов в int и сравниваем
+        //если числовые коды сравниваемых букв совпадают, то переходим к сравнению вторых букв в словах
+
+        try {
+            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
+            String fileLine;  //сюда будет помещаться считываемая строка
+            List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
+            List<String> addressesArrayList = new ArrayList<>();
+            List<String> namesArrayList = new ArrayList<>();
+
+            while (inputFileReader.ready()) {
+                fileLine = inputFileReader.readLine();
+                fileLinesArrayList.add(fileLine);
+            }
+
+            for (String line : fileLinesArrayList) {
+                namesArrayList.add(line.split("-")[0].trim());
+                addressesArrayList.add(line.split("-")[1].trim());
+            }
+
+            //юзаем quick sort
+            quickSort(addressesArrayList, 0, addressesArrayList.size() - 1);
+
+            //создаем файл
+            createFileFromStringArray(addressesArrayList, outputName);
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
     }
 
+    //----------------------------------вспомогательные функции для sortAddresses()-------------------------------------
+    public static void quickSort(List<String> list, int indexFrom, int indexTo) {
+        //addressesList - массив, который будем перебирать
+        //indexFrom - индекс элемента с которого начнется перебор
+        //indexTo - индекс элемента на котором закончится перебор
+
+        //проверка индексов. условие не сработает когда поступит массив из 1 элемента, который уже не надо сортировать
+        if (indexFrom < indexTo) {
+            int partitionIndex = partition(list, indexFrom, indexTo);
+
+            //сортировка для 1ой части массива (слева от опорного элемента)
+            quickSort(list, indexFrom, partitionIndex - 1);
+
+            //сортировка для 2ой части массива (справа от опорного элемента)
+            quickSort(list, partitionIndex, indexTo);
+        }
+    }
+
+    //функция выбора опорного элемента. возвращает индекс элемента, по которому массив будет разделяться на две части (на два подмассива)
+    public static int partition(List<String> list, int indexFrom, int indexTo) {
+        int startIndex = indexFrom;
+        int endIndex = indexTo;
+
+        String pivot = list.get(indexFrom);
+
+        while (startIndex <= endIndex) {
+            int i = 0; //индекс для букв в слове
+
+            //ищем элемент, который будет больше опорного (в левой части массива)
+            while ((startIndex < list.size()) && (int) list.get(startIndex).charAt(i) <= (int) pivot.charAt(i)) {
+                if ((int) list.get(startIndex).charAt(i) == (int) pivot.charAt(i) &&
+                        i + 1 < list.get(startIndex).length() &&
+                        i + 1 < pivot.length()) {
+                    i++;
+                }
+                else {
+                    startIndex++;
+                    i = 0;
+                }
+            }
+            i = 0;
+
+            //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
+            while(endIndex > -1 && (int) list.get(endIndex).charAt(i) >= (int) pivot.charAt(i)) {
+                if (    (int) list.get(endIndex).charAt(i) == (int) pivot.charAt(i) &&
+                        i + 1 < list.get(endIndex).length() &&
+                        i + 1 < pivot.length()) {
+                    i++;
+                }
+                else {
+                    endIndex--;
+                    i = 0;
+                }
+            }
+            i = 0;
+
+
+            //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
+            if (startIndex <= endIndex) {
+                swap(list, endIndex, startIndex);
+                startIndex++;
+                endIndex--;
+            }
+        }
+        return startIndex;
+    }
+
+    public static void swap(List<String> list, int index1, int index2) {
+       String temp = list.get(index1);
+       list.set(index1, list.get(index2));
+       list.set(index2, temp);
+    }
+    //------------------------------------------------------------------------------------------------------------------
     /**
      * Сортировка температур
      *
@@ -152,4 +349,22 @@ public class JavaTasks {
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
         throw new NotImplementedError();
     }
+
+
+    public static void createFileFromStringArray(List<String> list, String fileName) throws IOException{
+        //создаём файл
+        File outputFile = new File(fileName);
+        if (!outputFile.exists()) {
+            outputFile.createNewFile();
+        }
+        //записываем в него отсортированный массив
+        FileWriter outputFileWriter = new FileWriter(outputFile);
+        for (String address : list) {
+            outputFileWriter.append(address);
+            outputFileWriter.append("\n");
+            outputFileWriter.flush();
+        }
+    }
 }
+
+
