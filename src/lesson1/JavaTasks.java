@@ -181,7 +181,7 @@ public class JavaTasks {
             }
 
             //юзаем quick sort
-            quickSort(addressesArrayList, 0, addressesArrayList.size() - 1);
+            quickSortString(addressesArrayList, 0, addressesArrayList.size() - 1);
 
             //создаем файл
             createFileFromStringArray(addressesArrayList, outputName);
@@ -193,25 +193,25 @@ public class JavaTasks {
     }
 
     //----------------------------------вспомогательные функции для sortAddresses()-------------------------------------
-    public static void quickSort(List<String> list, int indexFrom, int indexTo) {
+    public static void quickSortString(List<String> list, int indexFrom, int indexTo) {
         //addressesList - массив, который будем перебирать
         //indexFrom - индекс элемента с которого начнется перебор
         //indexTo - индекс элемента на котором закончится перебор
 
         //проверка индексов. условие не сработает когда поступит массив из 1 элемента, который уже не надо сортировать
         if (indexFrom < indexTo) {
-            int partitionIndex = partition(list, indexFrom, indexTo);
+            int partitionIndex = partitionString(list, indexFrom, indexTo);
 
             //сортировка для 1ой части массива (слева от опорного элемента)
-            quickSort(list, indexFrom, partitionIndex - 1);
+            quickSortString(list, indexFrom, partitionIndex - 1);
 
             //сортировка для 2ой части массива (справа от опорного элемента)
-            quickSort(list, partitionIndex, indexTo);
+            quickSortString(list, partitionIndex, indexTo);
         }
     }
 
     //функция выбора опорного элемента. возвращает индекс элемента, по которому массив будет разделяться на две части (на два подмассива)
-    public static int partition(List<String> list, int indexFrom, int indexTo) {
+    public static int partitionString(List<String> list, int indexFrom, int indexTo) {
         int startIndex = indexFrom;
         int endIndex = indexTo;
 
@@ -296,9 +296,66 @@ public class JavaTasks {
      * 121.3
      */
     static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+//        throw new NotImplementedError();
+        try {
+            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
+            String fileLine;  //сюда будет помещаться считываемая строка
+            List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
+
+            while (inputFileReader.ready()) {
+                fileLine = inputFileReader.readLine();
+                fileLinesArrayList.add(fileLine);
+            }
+
+            quickSortDouble(fileLinesArrayList, 0, fileLinesArrayList.size() - 1);
+
+            createFileFromStringArray(fileLinesArrayList, outputName);
+        }
+        catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
     }
 
+    //------------------------------вспомогательная функция для sortTemperature-----------------------------------------
+    public static void quickSortDouble(List<String> list, int indexFrom, int indexTo) {
+        if (indexFrom < indexTo) {
+            int partitionIndex = partitionDouble(list, indexFrom, indexTo);
+
+            //сортировка для 1ой части массива (слева от опорного элемента)
+            quickSortDouble(list, indexFrom, partitionIndex - 1);
+
+            //сортировка для 2ой части массива (справа от опорного элемента)
+            quickSortDouble(list, partitionIndex, indexTo);
+        }
+    }
+
+    private static final Random random = new Random(Calendar.getInstance().getTimeInMillis());
+
+    public static int partitionDouble(List<String> list, int indexFrom, int indexTo) {
+        int leftIndex = indexFrom;
+        int rightIndex = indexTo;
+
+        String pivot = list.get(leftIndex + random.nextInt(rightIndex - leftIndex + 1));
+
+        while (leftIndex <= rightIndex) {
+
+            //ищем элемент, который будет больше опорного (в левой части массива)
+            while (Double.parseDouble(list.get(leftIndex)) <= Double.parseDouble(pivot)) { leftIndex++; }
+
+            //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
+            while(Double.parseDouble(list.get(rightIndex)) >= Double.parseDouble(pivot)) { rightIndex--; }
+
+            //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
+            if (leftIndex <= rightIndex) {
+                swap(list, rightIndex, leftIndex);
+                leftIndex++;
+                rightIndex--;
+            }
+        }
+        return rightIndex;
+    }
+    //------------------------------------------------------------------------------------------------------------------
     /**
      * Сортировка последовательности
      *
