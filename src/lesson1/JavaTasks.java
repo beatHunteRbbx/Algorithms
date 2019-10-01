@@ -221,7 +221,7 @@ public class JavaTasks {
             int i = 0; //индекс для букв в слове
 
             //ищем элемент, который будет больше опорного (в левой части массива)
-            while ((startIndex < list.size()) && (int) list.get(startIndex).charAt(i) <= (int) pivot.charAt(i)) {
+            while ((startIndex < list.size()) && (int) list.get(startIndex).charAt(i) < (int) pivot.charAt(i)) {
                 if ((int) list.get(startIndex).charAt(i) == (int) pivot.charAt(i) &&
                         i + 1 < list.get(startIndex).length() &&
                         i + 1 < pivot.length()) {
@@ -235,7 +235,7 @@ public class JavaTasks {
             i = 0;
 
             //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
-            while(endIndex > -1 && (int) list.get(endIndex).charAt(i) >= (int) pivot.charAt(i)) {
+            while(endIndex > -1 && (int) list.get(endIndex).charAt(i) > (int) pivot.charAt(i)) {
                 if (    (int) list.get(endIndex).charAt(i) == (int) pivot.charAt(i) &&
                         i + 1 < list.get(endIndex).length() &&
                         i + 1 < pivot.length()) {
@@ -341,10 +341,10 @@ public class JavaTasks {
         while (leftIndex <= rightIndex) {
 
             //ищем элемент, который будет больше опорного (в левой части массива)
-            while (Double.parseDouble(list.get(leftIndex)) <= Double.parseDouble(pivot)) { leftIndex++; }
+            while (Double.parseDouble(list.get(leftIndex)) < Double.parseDouble(pivot)) { leftIndex++; }
 
             //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
-            while(Double.parseDouble(list.get(rightIndex)) >= Double.parseDouble(pivot)) { rightIndex--; }
+            while(Double.parseDouble(list.get(rightIndex)) > Double.parseDouble(pivot)) { rightIndex--; }
 
             //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
             if (leftIndex <= rightIndex) {
@@ -353,7 +353,7 @@ public class JavaTasks {
                 rightIndex--;
             }
         }
-        return rightIndex;
+        return leftIndex;
     }
     //------------------------------------------------------------------------------------------------------------------
     /**
