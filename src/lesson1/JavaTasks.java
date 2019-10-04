@@ -180,8 +180,19 @@ public class JavaTasks {
                 addressesArrayList.add(line.split("-")[1].trim());
             }
 
-            //юзаем quick sort
+
+            //удаляем из списка повторяющиеся адреса
+            Set<String> addressesSet = new HashSet<>();
+            for (int i = 0; i < addressesArrayList.size(); i++) {
+                addressesSet.add(addressesArrayList.get(i));
+            }
+            addressesArrayList.clear();
+            addressesArrayList.addAll(addressesSet);
+
+            //юзаем quick sort для сортировки списка адресов
             quickSortString(addressesArrayList, 0, addressesArrayList.size() - 1);
+
+            addPeopleToAddress(addressesArrayList, fileLinesArrayList);
 
             //создаем файл
             createFileFromStringArray(addressesArrayList, outputName);
@@ -263,6 +274,25 @@ public class JavaTasks {
        String temp = list.get(index1);
        list.set(index1, list.get(index2));
        list.set(index2, temp);
+    }
+
+    private static void addPeopleToAddress(List<String> addressesList, List<String> arrFileLines) {
+        //проходим по массиву строк из файла (arrFileLines)
+        //и сравниваем адрес каждого человека с текущем адресом из массива адресов (addressesList)
+        //если адреса совпадают, то добавляем к элементу addressesList человека
+        boolean second = false;
+        for (int i = 0; i < addressesList.size(); i++) {
+            String address = addressesList.get(i);
+            addressesList.set(i, addressesList.get(i) + " - ");
+            for (int j = 0; j < arrFileLines.size(); j++) {
+                if (arrFileLines.get(j).contains(address)) {
+                    if (second) addressesList.set(i, addressesList.get(i) + ", ");
+                    addressesList.set(i, addressesList.get(i) + arrFileLines.get(j).split("-")[0].trim());
+                    second = true;
+                }
+            }
+            second = false;
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     /**
