@@ -223,51 +223,42 @@ public class JavaTasks {
 
     //функция выбора опорного элемента. возвращает индекс элемента, по которому массив будет разделяться на две части (на два подмассива)
     public static int partitionString(List<String> list, int indexFrom, int indexTo) {
-        int startIndex = indexFrom;
-        int endIndex = indexTo;
+        int leftIndex = indexFrom;
+        int rightIndex = indexTo;
 
-        String pivot = list.get(indexFrom);
+        String pivot = list.get(leftIndex + random.nextInt(rightIndex - leftIndex + 1));
 
-        while (startIndex <= endIndex) {
+        while (leftIndex <= rightIndex) {
             int i = 0; //индекс для букв в слове
 
             //ищем элемент, который будет больше опорного (в левой части массива)
-            while ((startIndex < list.size()) && (int) list.get(startIndex).charAt(i) < (int) pivot.charAt(i)) {
-                if ((int) list.get(startIndex).charAt(i) == (int) pivot.charAt(i) &&
-                        i + 1 < list.get(startIndex).length() &&
-                        i + 1 < pivot.length()) {
-                    i++;
-                }
-                else {
-                    startIndex++;
+            while ((int) list.get(leftIndex).charAt(i) < (int) pivot.charAt(i)) {
+
+
+                    leftIndex++;
                     i = 0;
-                }
+
             }
             i = 0;
 
             //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
-            while(endIndex > -1 && (int) list.get(endIndex).charAt(i) > (int) pivot.charAt(i)) {
-                if (    (int) list.get(endIndex).charAt(i) == (int) pivot.charAt(i) &&
-                        i + 1 < list.get(endIndex).length() &&
-                        i + 1 < pivot.length()) {
-                    i++;
-                }
-                else {
-                    endIndex--;
+            while((int) list.get(rightIndex).charAt(i) > (int) pivot.charAt(i)) {
+
+                    rightIndex--;
                     i = 0;
-                }
+
             }
             i = 0;
 
 
             //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
-            if (startIndex <= endIndex) {
-                swap(list, endIndex, startIndex);
-                startIndex++;
-                endIndex--;
+            if (leftIndex <= rightIndex) {
+                swap(list, rightIndex, leftIndex);
+                leftIndex++;
+                rightIndex--;
             }
         }
-        return startIndex;
+        return leftIndex;
     }
 
     public static void swap(List<String> list, int index1, int index2) {
