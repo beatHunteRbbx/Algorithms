@@ -3,6 +3,8 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -97,12 +99,176 @@ public class JavaAlgorithms {
      * Если общих подстрок нет, вернуть пустую строку.
      * При сравнении подстрок, регистр символов *имеет* значение.
      * Если имеется несколько самых длинных общих подстрок одной длины,
-     * вернуть ту из них, которая встречается раньше в строке first.
+     * вернуть ту из них, которая встречается раньше в строке firstString.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
+    static public String longestCommonSubstring(String firstString, String secondString) {
+        //throw new NotImplementedError();
+        StringBuilder answerString = new StringBuilder();
+
+        //создаём массив символов, чтобы разбить строку firstString на сегменты по два символа
+        char[] firstStringLetters = firstString.toCharArray();
+
+        ArrayList<String> firstStringSegmentsArray = new ArrayList<>();
+
+        //разбиваем строку firstString на сегменты по два символа
+        for (int i = 0; i < firstStringLetters.length - 1; i++) {
+            String segment = String.valueOf(firstStringLetters[i]) + (firstStringLetters[i+1]);
+            firstStringSegmentsArray.add(segment);
+        }
+
+        ArrayList<ArrayList<Integer>> segmentsMatrix_i = new ArrayList<>();
+
+        //составляем проекцию сегментов firstString на secondString
+        for (int i = 0; i < firstStringSegmentsArray.size(); i++) {
+            ArrayList<Integer> segmentsMatrix_j = new ArrayList<>();
+            for (int j = 0; j < secondString.length() - 1; j++) {
+                if (firstStringSegmentsArray.get(i).charAt(0) == (secondString.charAt(j)) &&
+                        firstStringSegmentsArray.get(i).charAt(1) == secondString.charAt(j + 1)) {
+                    segmentsMatrix_j.add(j);
+                    if (!segmentsMatrix_i.contains(segmentsMatrix_j)) segmentsMatrix_i.add(segmentsMatrix_j);
+                }
+            }
+        }
+        //Получившийся заполненный список списков можно назвать "картой пересечений"
+
+        //вытаскиваем из карты пересечений нужную последовательность (ищем маскимальное подмножество)
+        StringBuilder maxSegment = new StringBuilder();
+        StringBuilder currentSegment = new StringBuilder();
+
+//        boolean isArrayEmpty = false;
+        int currentSegmentIndex = 0;
+        int beginningSymbolIndex = 0;
+        int currentMatrixString = 0;
+        if (!segmentsMatrix_i.isEmpty()) {
+            while (beginningSymbolIndex < segmentsMatrix_i.get(0).size()) {
+                currentSegmentIndex = segmentsMatrix_i.get(0).get(beginningSymbolIndex);  //выбираем индекс для начальной буквы подмножества из 1ой строки матрицы
+                currentSegment.setLength(0);
+                currentSegment.append(secondString.charAt(currentSegmentIndex));//добавляем к "буферу" начальную букву подмножества
+                for (int i = 0; i < segmentsMatrix_i.size(); i++) {
+                    if (i < segmentsMatrix_i.size() - 1) {
+                        ArrayList<Integer> segmentsMatrix_j = segmentsMatrix_i.get(i + 1); //создаем отдельный списко для индексов следующей буквы
+                        int binarySearchResult = binarySearch(segmentsMatrix_j,
+                                0,
+                                segmentsMatrix_j.size() - 1,
+                                currentSegmentIndex + 1); //ищем следующий индекс (предыдущий_индекс + 1) с помощью бинарного поиска
+                        if (binarySearchResult > -1) { //если индекс существует
+                            currentSegmentIndex++; //увеличиваем текущий индекс на 1
+                            currentSegment.append(secondString.charAt(currentSegmentIndex)); //и длбавялем следующую букву в "буфер"
+                        } else { //если такого индекса не существует
+                            currentSegment.append(secondString.charAt(currentSegmentIndex + 1)); //добавляем последний символ в подмножество
+                            maxSegment.setLength(0);
+                            maxSegment.append(currentSegment);  //и заполняем хранитель максимального сегмента среди найденных
+                            if (beginningSymbolIndex < segmentsMatrix_i.get(currentMatrixString).size() - 1) beginningSymbolIndex++;
+                            else {
+                                currentMatrixString++;
+                                beginningSymbolIndex = 0;
+                            }
+                            if (currentMatrixString == segmentsMatrix_i.size() - 1) break;
+                            i = 0;
+                        }
+                    } else {
+                        currentSegment.append(secondString.charAt(currentSegmentIndex + 1));
+                        maxSegment.setLength(0);
+                        maxSegment.append(currentSegment);
+                        beginningSymbolIndex++;
+                        break;
+                    }
+                }
+//                for (int j = 1; j < segmentsMatrix_j.size() - 1; j++) {
+//                    int nextElementIndex = segmentsMatrix_j.get(binarySearch(segmentsMatrix_j,
+//                            0,
+//                            segmentsMatrix_j.size() - 1,
+//                            currentSegmentIndex + 1));
+//                    currentSegment.append(secondString.charAt(nextElementIndex));
+//                    if (segmentsMatrix_j.get(j) == segmentsMatrix_j.get(nextElementIndex)) {
+//                        currentSegmentIndex = segmentsMatrix_j.get(j);
+//                        currentSegment.append(secondString.charAt(currentSegmentIndex));
+//                    } else {
+//                        if (maxSegment.length() < currentSegment.length()) {
+//                            maxSegment.setLength(0);
+//                            maxSegment.append(currentSegment);
+//                        }
+//                        break;
+//                    }
+//                }
+//                if (beginningSymbolIndex < segmentsMatrix_i.get(0).size() - 1) beginningSymbolIndex++;
+//            }
+//            currentSegment.append(firstStringSegmentsArray.get(currentSegmentIndex).charAt(0));
+//            if (maxSegment.length() < currentSegment.length()) {
+//                maxSegment.setLength(0);
+//                maxSegment.append(currentSegment);
+//                currentSegment.setLength(0);
+//                currentSegment.append(" ");
+//            }
+            }
+//        if (maxSegment.length() != 0) {
+//            ArrayList<Integer> segmentsMatrix_jLast = segmentsMatrix_i.get(segmentsMatrix_i.size() - 1);
+//            maxSegment.append(secondString.charAt(segmentsMatrix_jLast.
+//                    get(binarySearch(   segmentsMatrix_jLast,
+//                                0,
+//                                segmentsMatrix_jLast.size() - 1,
+//                            currentSegmentIndex + 2)) + 1));
+//        }
+//        while (!isArrayEmpty) {
+//            isArrayEmpty = true;
+//
+//            mainLoop:
+//            for (int i = 0; i < firstStringSegmentsArray.size(); i++) {
+//                for (int j = 0; j < secondString.length() - 1; j++) {
+//                    if (segmentsMatrix[i][j] == 0) continue;
+//                    else {
+//                        if (currentSegmentIndex == 0) {
+//                            isArrayEmpty = false;
+//                            currentSegment.append(secondString.toCharArray()[segmentsMatrix[i][j]]);
+//                            currentSegmentIndex = segmentsMatrix[i][j];
+//                            segmentsMatrix[i][j] = 0;
+//                            break mainLoop;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            for (int i = 0; i < secondString.length() - 1; i++) {
+//                if (segmentsMatrix[i][currentSegmentIndex + 1] != 0) {
+//                    currentSegment.append(secondString.toCharArray()[segmentsMatrix[i][currentSegmentIndex + 1]]);
+//                    currentSegmentIndex = segmentsMatrix[i][currentSegmentIndex + 1];
+//                    segmentsMatrix[i][currentSegmentIndex] = 0;
+//                } else {
+//                    maxSegment.append(currentSegment);
+//                    break;
+//                }
+//            }
+//
+//            if (currentSegment.toString().length() > maxSegment.toString().length()) {
+//                maxSegment.setLength(0); //удаление прошлой максимальной последовательности (очистка StringBuilder'a)
+//                maxSegment.append(currentSegment);
+//            }
+//
+//            currentSegment.setLength(0);
+//        }
+        }
+        answerString.append(maxSegment);
+        return answerString.toString().trim();
     }
 
+    private static int binarySearch(ArrayList<Integer> arr, int firstIndex, int lastIndex, int nextElementIndex) {
+        int middleIndex = -1;
+        if (arr.contains(nextElementIndex)) {
+            //находим индекс среднего (центрального) элемента массива
+            middleIndex = (firstIndex + lastIndex) / 2;
+
+            while ((arr.get(middleIndex) != nextElementIndex) && (firstIndex <= lastIndex)) {
+                if (arr.get(middleIndex) > nextElementIndex) {  //если центральный элемент больше искомого
+                    lastIndex = middleIndex - 1;                               //то переходим в левую часть массива (делаем индекс последнего элемента массива равным индексу элемента слева от центрального)
+                } else {                                                       //иначе
+                    firstIndex = middleIndex + 1;                              //переходим в правую часть массива (делаем индекс первого элемента массива равным индексу элемента справа от центрального)
+                }
+                //в конце каждой итерации ищем новый центральный элемент подмассива, в который мы переместились
+                middleIndex = (firstIndex + lastIndex) / 2;
+            }
+        }
+        return middleIndex;
+    }
     /**
      * Число простых чисел в интервале
      * Простая
