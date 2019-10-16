@@ -157,135 +157,67 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) {
-//        throw new NotImplementedError();
-
-        //суть:
-        //переводим 1ые буквы адресов в int и сравниваем
-        //если числовые коды сравниваемых букв совпадают, то переходим к сравнению вторых букв в словах
-
         try {
             BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
             String fileLine;  //сюда будет помещаться считываемая строка
             List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
-            List<String> addressesArrayList = new ArrayList<>();
-            List<String> namesArrayList = new ArrayList<>();
+            Map<String, Map<Integer, List<String>>> addressesMap = new HashMap<>();
 
             while (inputFileReader.ready()) {
                 fileLine = inputFileReader.readLine();
+                String address = fileLine.split(" - ")[1].split(" ")[0];
+                int houseNumber = Integer.parseInt(fileLine.split(" - ")[1].split(" ")[1]);
+                String name = fileLine.split("-")[0].trim();
+                if (addressesMap.containsKey(address)) {
+                    if (addressesMap.get(address).containsKey(houseNumber)) {
+                        addressesMap.get(address).get(houseNumber).add(name);
+                    }
+                    else {
+                        addressesMap.get(address).put(houseNumber, new LinkedList<>());
+                        addressesMap.get(address).get(houseNumber).add(name);
+                    }
+                }
+                else {
+                    addressesMap.put(address, new HashMap<>());
+                    addressesMap.get(address).put(houseNumber, new LinkedList<>());
+                    addressesMap.get(address).get(houseNumber).add(name);
+                }
                 fileLinesArrayList.add(fileLine);
             }
 
-            for (String line : fileLinesArrayList) {
-                namesArrayList.add(line.split("-")[0].trim());
-                addressesArrayList.add(line.split("-")[1].trim());
-            }
+            List<String> streetsList = new LinkedList<>();
+            streetsList.addAll(addressesMap.keySet());
+            streetsList.sort(String::compareTo);
 
-
-            //удаляем из списка повторяющиеся адреса
-            Set<String> addressesSet = new HashSet<>();
-            for (int i = 0; i < addressesArrayList.size(); i++) {
-                addressesSet.add(addressesArrayList.get(i));
-            }
-            addressesArrayList.clear();
-            addressesArrayList.addAll(addressesSet);
-
-            //юзаем quick sort для сортировки списка адресов
-            quickSortString(addressesArrayList, 0, addressesArrayList.size() - 1);
-
-            addPeopleToAddress(addressesArrayList, fileLinesArrayList);
-
-            //создаем файл
-            createFileFromStringArray(addressesArrayList, outputName);
-        }
-        catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
-    }
-
-    //----------------------------------вспомогательные функции для sortAddresses()-------------------------------------
-    public static void quickSortString(List<String> list, int indexFrom, int indexTo) {
-        //addressesList - массив, который будем перебирать
-        //indexFrom - индекс элемента с которого начнется перебор
-        //indexTo - индекс элемента на котором закончится перебор
-
-        //проверка индексов. условие не сработает когда поступит массив из 1 элемента, который уже не надо сортировать
-        if (indexFrom < indexTo) {
-            int partitionIndex = partitionString(list, indexFrom, indexTo);
-
-            //сортировка для 1ой части массива (слева от опорного элемента)
-            quickSortString(list, indexFrom, partitionIndex - 1);
-
-            //сортировка для 2ой части массива (справа от опорного элемента)
-            quickSortString(list, partitionIndex, indexTo);
-        }
-    }
-
-    //функция выбора опорного элемента. возвращает индекс элемента, по которому массив будет разделяться на две части (на два подмассива)
-    public static int partitionString(List<String> list, int indexFrom, int indexTo) {
-        int leftIndex = indexFrom;
-        int rightIndex = indexTo;
-
-        String pivot = list.get(leftIndex + random.nextInt(rightIndex - leftIndex + 1));
-
-        while (leftIndex <= rightIndex) {
-            int i = 0; //индекс для букв в слове
-
-            //ищем элемент, который будет больше опорного (в левой части массива)
-            while ((int) list.get(leftIndex).charAt(i) < (int) pivot.charAt(i)) {
-
-
-                    leftIndex++;
-                    i = 0;
-
-            }
-            i = 0;
-
-            //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
-            while((int) list.get(rightIndex).charAt(i) > (int) pivot.charAt(i)) {
-
-                    rightIndex--;
-                    i = 0;
-
-            }
-            i = 0;
-
-
-            //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
-            if (leftIndex <= rightIndex) {
-                swap(list, rightIndex, leftIndex);
-                leftIndex++;
-                rightIndex--;
-            }
-        }
-        return leftIndex;
-    }
-
-    public static void swap(List<String> list, int index1, int index2) {
-       String temp = list.get(index1);
-       list.set(index1, list.get(index2));
-       list.set(index2, temp);
-    }
-
-    private static void addPeopleToAddress(List<String> addressesList, List<String> arrFileLines) {
-        //проходим по массиву строк из файла (arrFileLines)
-        //и сравниваем адрес каждого человека с текущем адресом из массива адресов (addressesList)
-        //если адреса совпадают, то добавляем к элементу addressesList человека
-        boolean second = false;
-        for (int i = 0; i < addressesList.size(); i++) {
-            String address = addressesList.get(i);
-            addressesList.set(i, addressesList.get(i) + " - ");
-            for (int j = 0; j < arrFileLines.size(); j++) {
-                if (arrFileLines.get(j).contains(address)) {
-                    if (second) addressesList.set(i, addressesList.get(i) + ", ");
-                    addressesList.set(i, addressesList.get(i) + arrFileLines.get(j).split("-")[0].trim());
-                    second = true;
+            List<String> sortedAddressesList = new LinkedList<>();
+            for (String street : streetsList) {
+                StringBuilder fullAddress = new StringBuilder();
+                fullAddress.append(street).append(" ");
+                Map<Integer, List<String>> housesAndNamesMap = addressesMap.get(street);
+                List<Integer> houseNumbers = new LinkedList<>();
+                houseNumbers.addAll(addressesMap.get(street).keySet());
+                for (Integer houseNumber : houseNumbers) {
+                    fullAddress.append(houseNumber).append(" - ");
+                    List<String> names = new LinkedList<>();
+                    names.addAll(addressesMap.get(street).get(houseNumber));
+                    names.sort(String::compareTo);
+                    for (String name : names) {
+                        fullAddress.append(name).append(", ");
+                    }
+                    sortedAddressesList.add(fullAddress.deleteCharAt(fullAddress.length() - 2).toString().trim());
+                    fullAddress.setLength(0);
+                    fullAddress.append(street).append(" ");
                 }
             }
-            second = false;
+
+            //создаем файл
+            createFileFromStringArray(sortedAddressesList, outputName);
+        }
+        catch (IOException exception) {
+            throw new NotImplementedError();
         }
     }
-    //------------------------------------------------------------------------------------------------------------------
+
     /**
      * Сортировка температур
      *
@@ -375,6 +307,12 @@ public class JavaTasks {
             }
         }
         return leftIndex;
+    }
+
+    public static void swap(List<String> list, int index1, int index2) {
+        String temp = list.get(index1);
+        list.set(index1, list.get(index2));
+        list.set(index2, temp);
     }
     //------------------------------------------------------------------------------------------------------------------
     /**
