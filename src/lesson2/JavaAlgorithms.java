@@ -186,6 +186,120 @@ public class JavaAlgorithms {
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
     static public Set<String> baldaSearcher(String inputName, Set<String> words) {
-        throw new NotImplementedError();
+        try {
+            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName));
+            List<String> fileLinesList = new ArrayList<>();
+            while (inputFileReader.ready()) fileLinesList.add(inputFileReader.readLine());
+            int numberOfStrings = fileLinesList.size() + 1;
+            int numberOfRows = fileLinesList.get(0).split(" ").length + 1;
+
+            Letter[][] lettersMatrix = new Letter[numberOfStrings + 1][numberOfRows + 1];
+
+            Set<String> foundWords = new HashSet<>();
+            for (int i = 0; i <= numberOfStrings; i++) {
+                for (int j = 0; j <= numberOfRows; j++){
+                    if (i == 0) lettersMatrix[i][j] = new Letter("0");
+                    else if (j == 0 && i != 0) lettersMatrix[i][j] = new Letter("0");
+                    else if (j == numberOfRows) lettersMatrix[i][j] = new Letter("0");
+                    else if (i == numberOfStrings) lettersMatrix[i][j] = new Letter("0");
+                    else lettersMatrix[i][j] = new Letter(fileLinesList.get(i - 1).split(" ")[j - 1]);
+                }
+
+            }
+
+            StringBuilder wordBuilder = new StringBuilder();
+            matrixLoop: for (String word : words) {
+                char[] wordLetters = word.toCharArray();
+                int letterIndex = 0;
+
+                //обновляем посещаемость каждой буквы. для нового слова все буквы непосещены
+                for (int i = 0; i < numberOfStrings; i++) {
+                    for (int j = 0; j < numberOfRows; j++) {
+                        lettersMatrix[i][j].turnOffVisited();
+                    }
+                }
+                //ищем нужное слово
+                 for (int i = 0; i <= numberOfStrings; i++) {
+                    for (int j = 0; j <= numberOfRows; j++) {
+                        if (lettersMatrix[i][j].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex)))) {
+                            int iTemp = i;
+                            int jTemp = j;
+
+                            wordBuilder.append(word.charAt(letterIndex));
+                            lettersMatrix[i][j].hasVisited = true;
+                            while ((lettersMatrix[iTemp - 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) || //север
+                                    (lettersMatrix[iTemp + 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp + 1][jTemp].hasVisited) || //юг
+                                    (lettersMatrix[iTemp][jTemp - 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp][jTemp - 1].hasVisited) || //запад
+                                    (lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp][jTemp + 1].hasVisited)) {   //восток
+                                if (lettersMatrix[iTemp - 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) {
+                                    lettersMatrix[iTemp - 1][jTemp].hasVisited = true;
+                                    iTemp--;
+                                } else if ( lettersMatrix[iTemp + 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                            !lettersMatrix[iTemp + 1][jTemp].hasVisited) {
+                                    lettersMatrix[iTemp + 1][jTemp].hasVisited = true;
+                                    iTemp++;
+                                } else if ( lettersMatrix[iTemp][jTemp - 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                            !lettersMatrix[iTemp][jTemp - 1].hasVisited) {
+                                    lettersMatrix[iTemp][jTemp - 1].hasVisited = true;
+                                    jTemp--;
+                                } else if ( lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                            !lettersMatrix[iTemp][jTemp + 1].hasVisited) {
+                                    lettersMatrix[iTemp][jTemp + 1].hasVisited = true;
+                                    jTemp++;
+                                }
+                                letterIndex++;
+                                wordBuilder.append(word.charAt(letterIndex));
+                                if (letterIndex == word.length() - 1) break;
+                            }
+                            if (wordBuilder.toString().equalsIgnoreCase(word)) {
+                                foundWords.add(wordBuilder.toString());
+                                wordBuilder.setLength(0);
+                                continue matrixLoop;
+                            }
+                            else if (iTemp == i && jTemp == j) {
+                                lettersMatrix[i][j].turnOffVisited();
+                                letterIndex = 0;
+                            }
+                            else if ((iTemp != i || jTemp != j) && wordBuilder.length() > 1) {
+                                lettersMatrix[i][j].turnOffVisited();
+                                j -= 1; //если слово пробовалось составлятсяь но ничего не получилось, возвращаемся на 1 позицю назад в матрице, чтобы при следующей итерации вернуться в букву, из которой начинали
+                                letterIndex = 0;
+                            }
+
+                            wordBuilder.setLength(0);
+                        }
+                    }
+                }
+            }
+            return foundWords;
+        }
+        catch (IOException exception) {
+            throw new NotImplementedError();
+        }
+    }
+
+    static class Letter {
+        String letter;
+        boolean hasVisited = false;
+
+        Letter(String letter) {
+            this.letter = letter;
+        }
+
+        public void turnOffVisited() {
+            hasVisited = false;
+        }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Letter letter1 = (Letter) o;
+            return letter.equals(letter1.letter);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(letter);
+        }
     }
 }
