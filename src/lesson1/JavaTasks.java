@@ -39,8 +39,8 @@ public class JavaTasks {
      */
     static public void sortTimes(String inputName, String outputName) {
         //        throw new NotImplementedError();
-        try {
-            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
+        try (BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName))){;
+             //создаем буфер для считывания входного файла
             String line;  //сюда будет помещаться считываемая строка
             List<String> timeArrayList = new ArrayList<>();  //сюда будут помещаться строки из файла
             List<Integer> translatedTimeList = new ArrayList<>(); //список для отсортированных секунд
@@ -72,8 +72,7 @@ public class JavaTasks {
             createFileFromStringArray(timeArrayList, outputName);
         }
         catch (IOException exception) {
-            exception.printStackTrace();
-            //        throw new NotImplementedError();
+            throw new NotImplementedError();
         }
     }
 
