@@ -37,23 +37,37 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
+
+    /**
+     * Сложность
+     * Время: О(n^2)
+     * Память: O(n)
+     */
     static public void sortTimes(String inputName, String outputName) {
         //        throw new NotImplementedError();
         try (BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName))){;
              //создаем буфер для считывания входного файла
             String line;  //сюда будет помещаться считываемая строка
+
+            //Память: O(n)  n - количество элементов списка
             List<String> timeArrayList = new ArrayList<>();  //сюда будут помещаться строки из файла
+
+            //Память: O(n)  n - количество элементов списка
             List<Integer> translatedTimeList = new ArrayList<>(); //список для отсортированных секунд
+
             //считываем строки в файле пока они есть
+            //Время: O(time)  time - количество строк во входящем файле
             while (inputFileReader.ready()) {
                 line = inputFileReader.readLine();
                 timeArrayList.add(line);
             }
 
             //переводим время в каждой строке файла в секунды
+            //Время: O(time)   time - количество строк во входящем файле
             for (String time : timeArrayList) translatedTimeList.add(translateTimeToSeconds(time));
 
             //сортируем секунды с помощью insertion sort
+            //Время: O(n^2)    n - количество элементов в списке translatedTimeList
             for (int j = 1; j < translatedTimeList.size(); j++) {
                 int comparableTime = translatedTimeList.get(j);
                 int i = j - 1;
@@ -66,9 +80,11 @@ public class JavaTasks {
 
             //очищаем старый списсок и помещаем туда отсортированные секунды, переведенные в 12-часовой формат
             timeArrayList.clear();
+            //Время: O(n)
             for (Integer time : translatedTimeList) timeArrayList.add(translateSecondsToTime(time));
 
             //создаем файл
+            //Время: O(n)
             createFileFromStringArray(timeArrayList, outputName);
         }
         catch (IOException exception) {
@@ -77,6 +93,7 @@ public class JavaTasks {
     }
 
     //----------------------------------вспомогательные функции для sortTimes()-----------------------------------------
+    //Время: O(1)
     private static int translateTimeToSeconds(String time) {
         int answerSeconds = 0;
 
@@ -95,6 +112,7 @@ public class JavaTasks {
         return answerSeconds;
     }
 
+    //Время O(1)
     private static String translateSecondsToTime(int time) {
         StringBuilder answerTime = new StringBuilder();
         String answerMoon = "AM";
@@ -155,13 +173,27 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
+
+    /**
+     * Сложность
+     * Время: O(m*n*k)   ( O(n^3) )
+     * Память: O(m*n*k)  ( O(n^3) )
+     */
     static public void sortAddresses(String inputName, String outputName) {
         try {
             BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
             String fileLine;  //сюда будет помещаться считываемая строка
+
+            //Память: O(n)   n - количество элементов списка
             List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
+
+            //Память: O(n*m*k)
+            //n - число ключей главной мапы
+            //m - число ключей вложенной мапы
+            //k - число элементов в списке каждого ключа вложенной мапы
             Map<String, Map<Integer, List<String>>> addressesMap = new HashMap<>();
 
+            //Время: O(n)   n - число строк во входящем файле
             while (inputFileReader.ready()) {
                 fileLine = inputFileReader.readLine();
                 String address = fileLine.split(" - ")[1].split(" ")[0];
@@ -184,10 +216,17 @@ public class JavaTasks {
                 fileLinesArrayList.add(fileLine);
             }
 
+            //Память: O(n)  n - число элементов списка
             List<String> streetsList = new LinkedList<>();
             streetsList.addAll(addressesMap.keySet());
+
+            //Время: O(n*log(n)) n - число элементов streetsList
             streetsList.sort(String::compareTo);
 
+            //Время: O(m*n*k)   ( O(n^3) )
+            //n - число элементов streetList
+            //m - число элементов houseNumbers
+            //k - число элементов names
             List<String> sortedAddressesList = new LinkedList<>();
             for (String street : streetsList) {
                 StringBuilder fullAddress = new StringBuilder();
@@ -210,6 +249,7 @@ public class JavaTasks {
             }
 
             //создаем файл
+            //Время: O(n)
             createFileFromStringArray(sortedAddressesList, outputName);
         }
         catch (IOException exception) {
@@ -247,11 +287,19 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
+
+    /**
+     * Сложность
+     * Время:
+     * Память:
+     */
     static public void sortTemperatures(String inputName, String outputName) {
 //        throw new NotImplementedError();
         try {
             BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
             String fileLine;  //сюда будет помещаться считываемая строка
+
+            //Память: O(n)  n - число элементов списка
             List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
 
             while (inputFileReader.ready()) {
@@ -259,6 +307,7 @@ public class JavaTasks {
                 fileLinesArrayList.add(fileLine);
             }
 
+            //Время: O(n*log(n))   n - число элементов fileLinesArrayList
             quickSortDouble(fileLinesArrayList, 0, fileLinesArrayList.size() - 1);
 
             createFileFromStringArray(fileLinesArrayList, outputName);
