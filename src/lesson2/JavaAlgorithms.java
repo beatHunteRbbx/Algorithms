@@ -103,15 +103,25 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке firstString.
      */
+
+    /**
+     * Сложность
+     * Время: O(n^2)
+     * Память: O(n*m)
+     */
     static public String longestCommonSubstring(String firstString, String secondString) {
         //throw new NotImplementedError();
         StringBuilder answerString = new StringBuilder();
 
-        //создаём массив символов, чтобы разбить строку firstString на сегменты по два символа
+        //создаём двумерный массив символов, чтобы разбить firstString и secondString на буквы
+        //Память: O(n*m)
+        //n - число строк
+        //m - число стоблцов
         int[][] concurrenceMatrix = new int[firstString.length() + 1][secondString.length() + 1];
         ArrayList<String> firstStringSegmentsArray = new ArrayList<>();
 
         //составляем карту пересечений firstString и secondString
+        //Время: O(n^2)
         for (int i = 1; i < firstString.length(); i++) {
             for (int j = 1; j < secondString.length(); j++) {
                 if (firstString.charAt(i - 1) == secondString.charAt(j - 1)) {
@@ -122,6 +132,7 @@ public class JavaAlgorithms {
 
         StringBuilder maxSegment = new StringBuilder();
         StringBuilder currentSegment = new StringBuilder();
+        //Время: o(n^2)
         for (int i = 1; i < firstString.length(); i++) {
             for (int j = 1; j < secondString.length(); j++) {
                 if (concurrenceMatrix[i][j] == 1) {
@@ -185,17 +196,38 @@ public class JavaAlgorithms {
      * В файле буквы разделены пробелами, строки -- переносами строк.
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
+
+    /**
+     * Сложность
+     * Время: O(n*m*k)
+     * Память: O(n*m)
+     */
     static public Set<String> baldaSearcher(String inputName, Set<String> words) {
         try {
             BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName));
+
+            //Память: O(n)  n - число элементов списка
             List<String> fileLinesList = new ArrayList<>();
+
+            //Время: O(n) n - число строк во входящем файле
             while (inputFileReader.ready()) fileLinesList.add(inputFileReader.readLine());
+
             int numberOfStrings = fileLinesList.size() + 1;
             int numberOfRows = fileLinesList.get(0).split(" ").length + 1;
 
+            //Память: O(n*m)
+            //n - число строк матрицы + 1
+            //m - число столбцов матрицы + 1
             Letter[][] lettersMatrix = new Letter[numberOfStrings + 1][numberOfRows + 1];
 
+            //Память: O(n)  n - число посещенных координат
             Set<String> foundWords = new HashSet<>();
+
+            //Заполнение матрицы буквами
+            // *по периметру матрица заполняется нулями, чтобы при дальнейшем сравнении не было IndexOutOfBoundException
+            //Время: O(n*m)
+            //n - число строк матрицы + 1
+            //m - число столбцов матрицы + 1
             for (int i = 0; i <= numberOfStrings; i++) {
                 for (int j = 0; j <= numberOfRows; j++){
                     if (i == 0) lettersMatrix[i][j] = new Letter("0");
@@ -207,23 +239,36 @@ public class JavaAlgorithms {
 
             }
 
+
             StringBuilder wordBuilder = new StringBuilder();
+
+            //Время: O(n*m*k)
+            //n - число слов во входящем множестве
+            //m - число строк в матрице + 1
+            //n - число столбцов в матрице + 1
             matrixLoop: for (String word : words) {
+
+                //Память: O(n)  n - число букв в слове
                 char[] wordLetters = word.toCharArray();
                 int letterIndex = 0;
 
                 //обновляем посещаемость каждой буквы. для нового слова все буквы непосещены
+                //Время: O(n^2)
                 for (int i = 0; i < numberOfStrings; i++) {
                     for (int j = 0; j < numberOfRows; j++) {
                         lettersMatrix[i][j].turnOffVisited();
                     }
                 }
+
                 //ищем нужное слово
                  for (int i = 0; i <= numberOfStrings; i++) {
                     for (int j = 0; j <= numberOfRows; j++) {
                         if (lettersMatrix[i][j].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex)))) {
                             int iTemp = i;
                             int jTemp = j;
+
+                            //Память: O(n)  n - число посещенных букв (ячеек матрицы)
+                            LinkedList<CoordinatesPair> visitedLettersList = new LinkedList<>();
 
                             wordBuilder.append(word.charAt(letterIndex));
                             lettersMatrix[i][j].hasVisited = true;
@@ -233,18 +278,26 @@ public class JavaAlgorithms {
                                     (lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp][jTemp + 1].hasVisited)) {   //восток
                                 if (lettersMatrix[iTemp - 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) {
                                     lettersMatrix[iTemp - 1][jTemp].hasVisited = true;
+                                    CoordinatesPair pair = new CoordinatesPair(iTemp - 1, jTemp);
+                                    visitedLettersList.add(pair);
                                     iTemp--;
                                 } else if ( lettersMatrix[iTemp + 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
                                             !lettersMatrix[iTemp + 1][jTemp].hasVisited) {
                                     lettersMatrix[iTemp + 1][jTemp].hasVisited = true;
+                                    CoordinatesPair pair = new CoordinatesPair(iTemp + 1, jTemp);
+                                    visitedLettersList.add(pair);
                                     iTemp++;
                                 } else if ( lettersMatrix[iTemp][jTemp - 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
                                             !lettersMatrix[iTemp][jTemp - 1].hasVisited) {
                                     lettersMatrix[iTemp][jTemp - 1].hasVisited = true;
+                                    CoordinatesPair pair = new CoordinatesPair(iTemp, jTemp - 1);
+                                    visitedLettersList.add(pair);
                                     jTemp--;
                                 } else if ( lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
                                             !lettersMatrix[iTemp][jTemp + 1].hasVisited) {
                                     lettersMatrix[iTemp][jTemp + 1].hasVisited = true;
+                                    CoordinatesPair pair = new CoordinatesPair(iTemp, jTemp + 1);
+                                    visitedLettersList.add(pair);
                                     jTemp++;
                                 }
                                 letterIndex++;
@@ -262,7 +315,11 @@ public class JavaAlgorithms {
                             }
                             else if ((iTemp != i || jTemp != j) && wordBuilder.length() > 1) {
                                 lettersMatrix[i][j].turnOffVisited();
-                                j -= 1; //если слово пробовалось составлятсяь но ничего не получилось, возвращаемся на 1 позицю назад в матрице, чтобы при следующей итерации вернуться в букву, из которой начинали
+                                j -= 1; //если слово состовлялось но ничего не получилось, возвращаемся на 1 позицю назад в матрице, чтобы при следующей итерации вернуться в букву, из которой начинали
+                                visitedLettersList.removeLast(); //при этом удаляем из списка посещенных ячеек последнюю пару посещенных координат (последнюю посещенную букву)
+                                for (CoordinatesPair pair : visitedLettersList) { //и затем обнуляем посещаемость всех букв кроме
+                                    lettersMatrix[pair.i][pair.j].turnOffVisited(); // последней посещенной
+                                }// (у которой не получилось найти соседей), чтобы при следующем обходе снова не наткнуться на неё
                                 letterIndex = 0;
                             }
 
@@ -286,20 +343,18 @@ public class JavaAlgorithms {
             this.letter = letter;
         }
 
-        public void turnOffVisited() {
+        void turnOffVisited() {
             hasVisited = false;
         }
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Letter letter1 = (Letter) o;
-            return letter.equals(letter1.letter);
-        }
+    }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(letter);
+    static class CoordinatesPair {
+        int i;
+        int j;
+
+        CoordinatesPair(int i, int j) {
+            this.i = i;
+            this.j = j;
         }
     }
 }
