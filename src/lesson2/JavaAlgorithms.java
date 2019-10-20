@@ -230,11 +230,11 @@ public class JavaAlgorithms {
             //m - число столбцов матрицы + 1
             for (int i = 0; i <= numberOfStrings; i++) {
                 for (int j = 0; j <= numberOfRows; j++){
-                    if (i == 0) lettersMatrix[i][j] = new Letter("0");
-                    else if (j == 0 && i != 0) lettersMatrix[i][j] = new Letter("0");
-                    else if (j == numberOfRows) lettersMatrix[i][j] = new Letter("0");
-                    else if (i == numberOfStrings) lettersMatrix[i][j] = new Letter("0");
-                    else lettersMatrix[i][j] = new Letter(fileLinesList.get(i - 1).split(" ")[j - 1]);
+                    if (i == 0) lettersMatrix[i][j] = new Letter('0');
+                    else if (j == 0 && i != 0) lettersMatrix[i][j] = new Letter('0');
+                    else if (j == numberOfRows) lettersMatrix[i][j] = new Letter('0');
+                    else if (i == numberOfStrings) lettersMatrix[i][j] = new Letter('0');
+                    else lettersMatrix[i][j] = new Letter(fileLinesList.get(i - 1).split(" ")[j - 1].charAt(0));
                 }
 
             }
@@ -245,7 +245,7 @@ public class JavaAlgorithms {
             //Время: O(n*m*k)
             //n - число слов во входящем множестве
             //m - число строк в матрице + 1
-            //n - число столбцов в матрице + 1
+            //k - число столбцов в матрице + 1
             matrixLoop: for (String word : words) {
 
                 //Память: O(n)  n - число букв в слове
@@ -263,7 +263,7 @@ public class JavaAlgorithms {
                 //ищем нужное слово
                  for (int i = 0; i <= numberOfStrings; i++) {
                     for (int j = 0; j <= numberOfRows; j++) {
-                        if (lettersMatrix[i][j].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex)))) {
+                        if (lettersMatrix[i][j].letter == (word.charAt(letterIndex))) {
                             int iTemp = i;
                             int jTemp = j;
 
@@ -272,28 +272,28 @@ public class JavaAlgorithms {
 
                             wordBuilder.append(word.charAt(letterIndex));
                             lettersMatrix[i][j].hasVisited = true;
-                            while ((lettersMatrix[iTemp - 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) || //север
-                                    (lettersMatrix[iTemp + 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp + 1][jTemp].hasVisited) || //юг
-                                    (lettersMatrix[iTemp][jTemp - 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp][jTemp - 1].hasVisited) || //запад
-                                    (lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp][jTemp + 1].hasVisited)) {   //восток
-                                if (lettersMatrix[iTemp - 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) {
+                            while ((lettersMatrix[iTemp - 1][jTemp].letter == (word.charAt(letterIndex + 1)) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) || //север
+                                    (lettersMatrix[iTemp + 1][jTemp].letter == (word.charAt(letterIndex + 1)) && !lettersMatrix[iTemp + 1][jTemp].hasVisited) || //юг
+                                    (lettersMatrix[iTemp][jTemp - 1].letter == (word.charAt(letterIndex + 1)) && !lettersMatrix[iTemp][jTemp - 1].hasVisited) || //запад
+                                    (lettersMatrix[iTemp][jTemp + 1].letter == (word.charAt(letterIndex + 1)) && !lettersMatrix[iTemp][jTemp + 1].hasVisited)) {   //восток
+                                if (lettersMatrix[iTemp - 1][jTemp].letter == (word.charAt(letterIndex + 1)) && !lettersMatrix[iTemp - 1][jTemp].hasVisited) {
                                     lettersMatrix[iTemp - 1][jTemp].hasVisited = true;
                                     CoordinatesPair pair = new CoordinatesPair(iTemp - 1, jTemp);
                                     visitedLettersList.add(pair);
                                     iTemp--;
-                                } else if ( lettersMatrix[iTemp + 1][jTemp].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                } else if ( lettersMatrix[iTemp + 1][jTemp].letter == (word.charAt(letterIndex + 1)) &&
                                             !lettersMatrix[iTemp + 1][jTemp].hasVisited) {
                                     lettersMatrix[iTemp + 1][jTemp].hasVisited = true;
                                     CoordinatesPair pair = new CoordinatesPair(iTemp + 1, jTemp);
                                     visitedLettersList.add(pair);
                                     iTemp++;
-                                } else if ( lettersMatrix[iTemp][jTemp - 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                } else if ( lettersMatrix[iTemp][jTemp - 1].letter == (word.charAt(letterIndex + 1)) &&
                                             !lettersMatrix[iTemp][jTemp - 1].hasVisited) {
                                     lettersMatrix[iTemp][jTemp - 1].hasVisited = true;
                                     CoordinatesPair pair = new CoordinatesPair(iTemp, jTemp - 1);
                                     visitedLettersList.add(pair);
                                     jTemp--;
-                                } else if ( lettersMatrix[iTemp][jTemp + 1].letter.equalsIgnoreCase(String.valueOf(word.charAt(letterIndex + 1))) &&
+                                } else if ( lettersMatrix[iTemp][jTemp + 1].letter == (word.charAt(letterIndex + 1)) &&
                                             !lettersMatrix[iTemp][jTemp + 1].hasVisited) {
                                     lettersMatrix[iTemp][jTemp + 1].hasVisited = true;
                                     CoordinatesPair pair = new CoordinatesPair(iTemp, jTemp + 1);
@@ -336,10 +336,10 @@ public class JavaAlgorithms {
     }
 
     static class Letter {
-        String letter;
+        char letter;
         boolean hasVisited = false;
 
-        Letter(String letter) {
+        Letter(char letter) {
             this.letter = letter;
         }
 
