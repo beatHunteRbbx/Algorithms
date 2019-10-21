@@ -97,9 +97,11 @@ public class JavaTasks {
     private static int translateTimeToSeconds(String time) {
         int answerSeconds = 0;
 
-        int hour = Integer.parseInt(time.split(" ")[0].split(":")[0]);
-        int minutes = Integer.parseInt(time.split(" ")[0].split(":")[1]);
-        int seconds = Integer.parseInt(time.split(" ")[0].split(":")[2]);
+
+        String[] arrTime = time.split(" ")[0].split(":");
+        int hour = Integer.parseInt(arrTime[0]);
+        int minutes = Integer.parseInt(arrTime[1]);
+        int seconds = Integer.parseInt(arrTime[2]);
         String moon = time.split(" ")[1];
 
         if (moon.equalsIgnoreCase("pm")) answerSeconds += 12 * 3600;
@@ -236,7 +238,7 @@ public class JavaTasks {
                 houseNumbers.addAll(addressesMap.get(street).keySet());
                 for (Integer houseNumber : houseNumbers) {
                     fullAddress.append(houseNumber).append(" - ");
-                    List<String> names = new LinkedList<>();
+                    List<String> names = new ArrayList<>();
                     names.addAll(addressesMap.get(street).get(houseNumber));
                     names.sort(String::compareTo);
                     for (String name : names) {
@@ -290,79 +292,47 @@ public class JavaTasks {
 
     /**
      * Сложность
-     * Время:
-     * Память:
+     * Время: O(n^2)
+     * Память: O(n)
      */
     static public void sortTemperatures(String inputName, String outputName) {
-//        throw new NotImplementedError();
-        try {
-            BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName)); //создаем буфер для считывания входного файла
-            String fileLine;  //сюда будет помещаться считываемая строка
 
-            //Память: O(n)  n - число элементов списка
-            List<String> fileLinesArrayList = new ArrayList<>();//сюда будут помещаться строки из файла
+        //Память: O(n)   n - число строк во входящем файле
+        Map<Double, Integer> temperatureMap = new TreeMap<>();
 
+        try(BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName))) {
+
+            //Время: O(n)    n - число строк во входящем файле
             while (inputFileReader.ready()) {
-                fileLine = inputFileReader.readLine();
-                fileLinesArrayList.add(fileLine);
+                Double currentTemperature = Double.parseDouble(inputFileReader.readLine());
+                if (temperatureMap.containsKey(currentTemperature)) {
+                    temperatureMap.put(currentTemperature, temperatureMap.get(currentTemperature) + 1);
+                }
+                else {
+                    temperatureMap.put(currentTemperature, 1);
+                }
             }
 
-            //Время: O(n*log(n))   n - число элементов fileLinesArrayList
-            quickSortDouble(fileLinesArrayList, 0, fileLinesArrayList.size() - 1);
+            File outputFile = new File(outputName);
+            if (!outputFile.exists()) {
+                outputFile.createNewFile();
+            }
+            FileWriter outputFileWriter = new FileWriter(outputFile);
 
-            createFileFromStringArray(fileLinesArrayList, outputName);
+            //Время: O(n^2)   n - число элементов temperatureMap
+            for (Map.Entry entry : temperatureMap.entrySet()) {
+                for (int i = 0; i < (int) entry.getValue(); i++) {
+                    outputFileWriter.append(entry.getKey().toString());
+                    outputFileWriter.append("\n");
+                    outputFileWriter.flush();
+                }
+            }
         }
         catch (IOException exception) {
-            exception.printStackTrace();
-        }
-
-    }
-
-    //------------------------------вспомогательная функция для sortTemperature-----------------------------------------
-    public static void quickSortDouble(List<String> list, int indexFrom, int indexTo) {
-        if (indexFrom < indexTo) {
-            int partitionIndex = partitionDouble(list, indexFrom, indexTo);
-
-            //сортировка для 1ой части массива (слева от опорного элемента)
-            quickSortDouble(list, indexFrom, partitionIndex - 1);
-
-            //сортировка для 2ой части массива (справа от опорного элемента)
-            quickSortDouble(list, partitionIndex, indexTo);
+            throw new NotImplementedError();
         }
     }
 
-    private static final Random random = new Random(Calendar.getInstance().getTimeInMillis());
-
-    public static int partitionDouble(List<String> list, int indexFrom, int indexTo) {
-        int leftIndex = indexFrom;
-        int rightIndex = indexTo;
-
-        String pivot = list.get(leftIndex + random.nextInt(rightIndex - leftIndex + 1));
-
-        while (leftIndex <= rightIndex) {
-
-            //ищем элемент, который будет больше опорного (в левой части массива)
-            while (Double.parseDouble(list.get(leftIndex)) < Double.parseDouble(pivot)) { leftIndex++; }
-
-            //как только нашли элемент больше опорного, ищем элемент, который будет меньше опорного (уже в правой части массива)
-            while(Double.parseDouble(list.get(rightIndex)) > Double.parseDouble(pivot)) { rightIndex--; }
-
-            //после того, как нашли элемент больший опорного и элемент меньший опорного, то меняем их местами
-            if (leftIndex <= rightIndex) {
-                swap(list, rightIndex, leftIndex);
-                leftIndex++;
-                rightIndex--;
-            }
-        }
-        return leftIndex;
-    }
-
-    public static void swap(List<String> list, int index1, int index2) {
-        String temp = list.get(index1);
-        list.set(index1, list.get(index2));
-        list.set(index2, temp);
-    }
-    //------------------------------------------------------------------------------------------------------------------
     /**
      * Сортировка последовательности
      *
@@ -413,7 +383,6 @@ public class JavaTasks {
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
         throw new NotImplementedError();
     }
-
 
     public static void createFileFromStringArray(List<String> list, String fileName) throws IOException{
         //создаём файл
