@@ -116,9 +116,9 @@ public class JavaTasks {
     private static String translateSecondsToTime(int time) {
         StringBuilder answerTime = new StringBuilder();
         String answerMoon = "AM";
-        int hour = Math.round(time / 3600);
-        int minutes = Math.round((time - (hour * 3600)) / 60);
-        int seconds = Math.round(time - (hour * 3600) - (minutes * 60));
+        int hour = time / 3600;
+        int minutes = time % 3600 / 60;
+        int seconds = time % 3600 % 60;
         if (hour >= 12) {
             answerMoon = "PM";
             hour -= 12;
