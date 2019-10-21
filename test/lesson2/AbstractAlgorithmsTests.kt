@@ -120,6 +120,12 @@ abstract class AbstractAlgorithmsTests {
                 File("input/ruslan_ludmila_2.txt").readText()
             ).trim()
         )
+        assertEquals(
+            "СЛОВОРАЗ",
+            longestCommonSubstring(
+                "ываыааывасмцусцйулвоилуцовийивйдшСЛОВОРАЗфыажфыофджывофыдвоовйщзцвьСЛОВОДВА",
+                "вйцвйцвйСЛОВОРАЗыфваываываывСЛОВОДВАываывааыаываыва").trimIndent()
+        )
     }
 
     fun calcPrimesNumber(calcPrimesNumber: (Int) -> Int) {
@@ -169,6 +175,15 @@ abstract class AbstractAlgorithmsTests {
                     "АППРОКСИМАЦИЯ", "ИНТЕРПОЛЯЦИЯ", "МАЙЕВТИКА", "ШРЕДИНГЕР", "ЭЙНШТЕЙН"
                 )
             )
+        )
+        assertEquals(
+            setOf("qwerty"),
+            baldaSearcher("input/my_balda_test.txt", setOf("qwerty", "qwertyuio"))
+        )
+        assertEquals(
+            setOf("аврора", "утюг", "наган", "гиги", "за", "шаги", "тааааааааа", "шааа"),
+            baldaSearcher("input/my_balda_test2.txt",
+                setOf("аврора", "утюг", "наган", "гиги", "за", "шаги", "тааааааааа", "шааа", "ныаа"))
         )
     }
 }
