@@ -293,37 +293,29 @@ public class JavaTasks {
     /**
      * Сложность
      * Время: O(n^2)
-     * Память: O(n)
+     * Память: O(1)
      */
     static public void sortTemperatures(String inputName, String outputName) {
 
-        //Память: O(n)   n - число строк во входящем файле
-        Map<Double, Integer> temperatureMap = new TreeMap<>();
-
-        try(BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName))) {
-
-            //Время: O(n)    n - число строк во входящем файле
+        int minTemperature = 273;
+        int maxTemperature = 500;
+        int arraySize = (minTemperature + maxTemperature) * 10 + 1;
+        //Память: O(1), так как исходя из условия задания можно точно расчитать размерность массива
+        int[] arrTemperature = new int[arraySize];
+        try (BufferedReader inputFileReader = new BufferedReader(new FileReader(inputName))) {
+            //Время: O(n)   n - число строк во входящем файле
             while (inputFileReader.ready()) {
-                Double currentTemperature = Double.parseDouble(inputFileReader.readLine());
-                if (temperatureMap.containsKey(currentTemperature)) {
-                    temperatureMap.put(currentTemperature, temperatureMap.get(currentTemperature) + 1);
-                }
-                else {
-                    temperatureMap.put(currentTemperature, 1);
-                }
+                int currentTemperature = ((int) (Double.parseDouble(inputFileReader.readLine()) * 10)) + 2730;
+                arrTemperature[currentTemperature]++;
             }
-
             File outputFile = new File(outputName);
-            if (!outputFile.exists()) {
-                outputFile.createNewFile();
-            }
-            FileWriter outputFileWriter = new FileWriter(outputFile);
-
-            //Время: O(n^2)   n - число элементов temperatureMap
-            for (Map.Entry entry : temperatureMap.entrySet()) {
-                for (int i = 0; i < (int) entry.getValue(); i++) {
-                    outputFileWriter.append(entry.getKey().toString());
-                    outputFileWriter.append("\n");
+            if (!outputFile.exists()) outputFile.createNewFile();
+            BufferedWriter outputFileWriter = new BufferedWriter(new FileWriter(outputFile));
+            //Время: O(n)   n - число повторений текущей температуры (значение в ячейке массива)
+            for (int i = 0; i < arrTemperature.length; i++) {
+                for (int j = 0; j < arrTemperature[i]; j++) {
+                    String outputFileLine = Double.toString((i - 2730) / 10d);
+                    outputFileWriter.write(outputFileLine + "\n");
                     outputFileWriter.flush();
                 }
             }
