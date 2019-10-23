@@ -166,8 +166,34 @@ public class JavaAlgorithms {
      * Справка: простым считается число, которое делится нацело только на 1 и на себя.
      * Единица простым числом не считается.
      */
+
+    /**
+     * Сложность
+     * Время: O(n*log(log(n)))  n - количество чисел в интервале
+     * Память: O(n)   n - количество чисел в интервале
+     */
     static public int calcPrimesNumber(int limit) {
-        throw new NotImplementedError();
+//       throw new NotImplementedError();
+        //Метод решения: Алгоритм "Решето Эратосфена"
+        if(limit > 1) {
+            List<Integer> numbersList = new ArrayList<>();
+            for (int i = 0; i <= limit; i++) numbersList.add(i);
+            numbersList.set(1, 0);
+
+            for (int i = 2; i <= limit; i++) {
+                if (numbersList.get(i) != 0) {
+                    int j = i + i;
+                    while (j <= limit) {
+                        numbersList.set(j, 0);
+                        j += i;
+                    }
+                }
+            }
+            Set<Integer> primeNumbersSet = new HashSet<>(numbersList);
+            primeNumbersSet.remove(0);
+            return primeNumbersSet.size();
+        }
+        else return 0;
     }
 
     /**
