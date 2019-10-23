@@ -25,6 +25,18 @@ abstract class AbstractTaskTests : AbstractFileTests() {
                      07:56:14 PM
                 """.trimIndent()
             )
+            sortTimes("input/my_time_in.txt", "temp.txt")
+            assertFileContent(
+                "temp.txt",
+                """
+                     12:00:01 AM
+                     12:00:11 AM
+                     12:40:31 AM
+                     12:00:01 PM
+                     01:00:00 PM
+                     01:15:19 PM
+                """.trimIndent()
+            )
         } finally {
             File("temp.txt").delete()
         }
@@ -55,6 +67,21 @@ abstract class AbstractTaskTests : AbstractFileTests() {
                 """
                     Железнодорожная 3 - Петров Иван
                     Железнодорожная 7 - Иванов Алексей, Иванов Михаил
+                    Садовая 5 - Сидоров Петр, Сидорова Мария
+                """.trimIndent()
+            )
+            sortAddresses("input/my_addr_in.txt", "temp.txt")
+            assertFileContent(
+                "temp.txt",
+                """
+                    Есенина 4 - Загородный Нуар
+                    Есенина 5 - Пушкин Александр
+                    Железнодорожная 3 - Петров Иван
+                    Железнодорожная 7 - Иванов Алексей, Иванов Михаил
+                    Каруселина 10 - Иванов Илья
+                    Каруселина 666 - Лакеев Амир
+                    Колотушкина 666 - Бодров Никола, Хараводченко Гога
+                    Пушкина 2 - Есенин Сергей
                     Садовая 5 - Сидоров Петр, Сидорова Мария
                 """.trimIndent()
             )
@@ -113,6 +140,40 @@ abstract class AbstractTaskTests : AbstractFileTests() {
                     24.7
                     99.5
                     121.3
+                """.trimIndent()
+            )
+            sortTemperatures("input/my_temp_in.txt", "temp.txt")
+            assertFileContent(
+                "temp.txt",
+                """
+                    -273.0
+                    -273.0
+                    -273.0
+                    -273.0
+                    -273.0
+                    -273.0
+                    -273.0
+                    -273.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    0.0
+                    500.0
+                    500.0
+                    500.0
+                    500.0
+                    500.0
+                    500.0
+                    500.0
+                    500.0
                 """.trimIndent()
             )
         } finally {
