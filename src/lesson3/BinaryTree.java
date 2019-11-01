@@ -74,10 +74,39 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        root = removeNode(root, o);
+        size--;
+        return true;
+    }
+    public Node<T> removeNode(Node<T> root, Object o) {
+      if (root == null) return null;
+      if (o.equals(root.value)) {
+          if (root.left != null && root.right != null) { //если у элемента два дерева-потомка, то перед его удалением
+              root = minNode(root.right);   //стараемся "сбалансировать" дерево - ищем в левой части правого поддерева минимальный элемент
+              root.right = removeNode(root.right, root.value);
+          }
+          else {
+              if (root.left == null && root.right == null) { //если у элемента нет потомков
+                  return null;                        //удаляем его из дерева (делаем значение ссылки для родителя null)
+              }
+              else if (root.left != null) return root.left;
+              else return root.right;
+          }
+      }
+      else {
+          if (((T) o).compareTo(root.value) < 0) {
+              root.left = removeNode(root.left, o);
+          } else {
+              root.right = removeNode(root.right, o);
+          }
+      }
+      return root;
     }
 
+    public Node<T> minNode (Node<T> root) {
+        if (root.left != null) minNode(root);
+        return root;
+    }
     @Override
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked")
