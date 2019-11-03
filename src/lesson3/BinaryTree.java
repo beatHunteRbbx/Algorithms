@@ -76,6 +76,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public boolean remove(Object o) {
         root = removeNode(root, o);
         size--;
+        if (root == null) return false;
         return true;
     }
     public Node<T> removeNode(Node<T> root, Object o) {
@@ -147,8 +148,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+//            throw new NotImplementedError();
+            if (    root == null ||
+                    root.left == null ||
+                    root.right == null ) return false;
+            return true;
         }
 
         /**
@@ -157,7 +161,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
+            if (hasNext()) return root.right.value;
             throw new NotImplementedError();
         }
 
