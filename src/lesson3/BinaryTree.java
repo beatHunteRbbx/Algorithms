@@ -72,19 +72,29 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Удаление элемента в дереве
      * Средняя
      */
+
+    /**
+     * Сложность
+     * Время: O(n*log(n))
+     * Память: O(1)
+     */
     @Override
     public boolean remove(Object o) {
-        root = removeNode(root, o);
+        if (find((T) o) ==  null) return false; //если элемент в дереве не найден, возвращаем false
+        root = removeNode(root, new Node<>((T) o));
         size--;
-        if (root == null) return false;
         return true;
     }
-    public Node<T> removeNode(Node<T> root, Object o) {
+
+    private Node<T> removeNode(Node<T> root, Node<T> removableNode) {
       if (root == null) return null;
-      if (o.equals(root.value)) {
+      if (removableNode.value.equals(root.value)) {
           if (root.left != null && root.right != null) { //если у элемента два дерева-потомка, то перед его удалением
-              root = minNode(root.right);   //стараемся "сбалансировать" дерево - ищем в левой части правого поддерева минимальный элемент
-              root.right = removeNode(root.right, root.value);
+              Node<T> node = new Node<>(minNode(root.right)); //стараемся "сбалансировать" дерево - ищем в левой части правого поддерева минимальный элемент
+              node.left = root.left;  //переопределяем ссылки на элементы
+              node.right = root.right; //у минимального элемента и корня дерева
+              root = node;
+              root.right = removeNode(root.right, root); //рекурсивно удаляем минимальный элемент из дерева
           }
           else {
               if (root.left == null && root.right == null) { //если у элемента нет потомков
@@ -95,19 +105,24 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
           }
       }
       else {
-          if (((T) o).compareTo(root.value) < 0) {
-              root.left = removeNode(root.left, o);
+          if ((removableNode.value).compareTo(root.value) < 0) {
+              root.left = removeNode(root.left, removableNode);
           } else {
-              root.right = removeNode(root.right, o);
+              root.right = removeNode(root.right, removableNode);
           }
       }
       return root;
     }
 
-    public Node<T> minNode (Node<T> root) {
-        if (root.left != null) minNode(root);
-        return root;
+    private T minNode(Node<T> node) {
+        if (node == null) return null;
+        Node<T> currentNode = node;
+        while (currentNode.left != null) {
+            currentNode = currentNode.left;
+        }
+        return currentNode.value;
     }
+
     @Override
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked")
@@ -138,21 +153,26 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     public class BinaryTreeIterator implements Iterator<T> {
 
+        private Node<T> currentNode = null;
+        private Deque<Node<T>> stack = new LinkedList<>();
+
         private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
+            if (root == null) return;
+            createStack(root);
         }
 
+        private void createStack(Node<T> node) {
+            if (node.left != null) createStack(node.left);
+            stack.add(node);
+            if (node.right != null) createStack(node.right);
+        }
         /**
          * Проверка наличия следующего элемента
          * Средняя
          */
         @Override
         public boolean hasNext() {
-//            throw new NotImplementedError();
-            if (    root == null ||
-                    root.left == null ||
-                    root.right == null ) return false;
-            return true;
+            return stack.peek() != null;
         }
 
         /**
@@ -161,8 +181,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            if (hasNext()) return root.right.value;
-            throw new NotImplementedError();
+            //достаем самый верхний элемент из стека
+            currentNode = stack.poll();
+            if (currentNode == null) throw new NoSuchElementException();
+            return currentNode.value;
         }
 
         /**
@@ -171,8 +193,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            // TODO
-            throw new NotImplementedError();
+            BinaryTree.this.remove(minNode(currentNode.right));
         }
     }
 
