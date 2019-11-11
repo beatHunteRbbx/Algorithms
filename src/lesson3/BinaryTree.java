@@ -9,6 +9,9 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
+    private T fromElement;
+    private T toElement;
+
     private static class Node<T> {
         final T value;
 
@@ -26,13 +29,17 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     private int size = 0;
 
     @Override
-    public boolean add(T t) {
-        Node<T> closest = find(t);
-        int comparison = closest == null ? -1 : t.compareTo(closest.value);
+    public boolean add(T value) {
+        if (fromElement != null && toElement != null) {
+            if (!inRange(value)) throw new IllegalArgumentException();
+        }
+
+        Node<T> closest = find(value);
+        int comparison = closest == null ? -1 : value.compareTo(closest.value);
         if (comparison == 0) {
             return false;
         }
-        Node<T> newNode = new Node<>(t);
+        Node<T> newNode = new Node<>(value);
         if (closest == null) {
             root = newNode;
         }
@@ -48,6 +55,9 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return true;
     }
 
+    private boolean inRange(T value) {
+        return  value.compareTo(fromElement) >= 0 && value.compareTo(toElement) < 0;
+    }
     public boolean checkInvariant() {
         return root == null || checkInvariant(root);
     }
@@ -71,9 +81,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     /**
      * Удаление элемента в дереве
      * Средняя
-     */
-
-    /**
+     *
+     *
      * Сложность
      * Время: O(n*log(n))
      * Память: O(1)
@@ -169,6 +178,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Проверка наличия следующего элемента
          * Средняя
+         *
+         * Сложность
+         * Время: O(n)   n - число элементов в дереве
+         * Память: O(1)
          */
         @Override
         public boolean hasNext() {
@@ -178,6 +191,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Поиск следующего элемента
          * Средняя
+         *
+         * Сложность
+         * Время: O(n)   n - число элементов в дереве
+         * Память: O(1)
          */
         @Override
         public T next() {
@@ -190,10 +207,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Удаление следующего элемента
          * Сложная
+         *
+         * Сложность
+         * Время: O(h)   h - высота дерева
+         * Память: O(1)
          */
         @Override
         public void remove() {
-            BinaryTree.this.remove(minNode(currentNode.right));
+            BinaryTree.this.remove(currentNode.value);
         }
     }
 
@@ -222,10 +243,47 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        BinaryTree<T> tree = new BinaryTree<>();
+        tree.addAll(this);
+        tree.fromElement = fromElement;
+        tree.toElement = toElement;
+        for (T nodeValue : tree) {
+            if (nodeValue.compareTo(fromElement) < 0) {
+                tree.remove(nodeValue);
+            }
+            if (nodeValue.compareTo(toElement) >= 0){
+                tree.remove(nodeValue);
+            }
+        }
+        return tree;
     }
 
+//    private class SubBinaryTree extends BinaryTree<T>{
+//
+//        BinaryTree<T> binaryTree;
+//        T fromElement;
+//        T toElement;
+//
+//        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement) {
+//            this.binaryTree = binaryTree;
+//            this.fromElement = fromElement;
+//            this.toElement = toElement;
+//        }
+//
+//        @Override
+//        public boolean remove(Object object) {
+//            return binaryTree.remove(object);
+//        }
+//
+//        @Override
+//        public boolean add(T value) {
+//            if (value.compareTo(fromElement) < 0 &&
+//                value.compareTo(toElement) >= 0) throw new IllegalArgumentException();
+//            return binaryTree.add(value);
+//        }
+//
+//
+//    }
     /**
      * Найти множество всех элементов меньше заданного
      * Сложная
@@ -233,6 +291,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
+        //нужно составить множество из элементов, которые находятся в левом поддереве заданного элемента и из всех
+        //элементов, идущих выше заданного элемента
         // TODO
         throw new NotImplementedError();
     }
