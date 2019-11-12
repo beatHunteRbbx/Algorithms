@@ -11,6 +11,11 @@ class JavaHeadSetTest : AbstractHeadTailTest() {
         fillTree { BinaryTree() }
     }
 
+    @BeforeEach
+    fun fillMyTree() {
+        fillMyTree { BinaryTree() }
+    }
+
     @Test
     @Tag("Normal")
     fun headSetTest() {
