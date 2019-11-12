@@ -1,6 +1,5 @@
 package lesson3;
 
-import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,8 +8,6 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
-    private T fromElement;
-    private T toElement;
 
     private static class Node<T> {
         final T value;
@@ -24,16 +21,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
     }
 
+    BinaryTree() {
+    }
     private Node<T> root = null;
 
     private int size = 0;
 
     @Override
     public boolean add(T value) {
-        if (fromElement != null && toElement != null) {
-            if (!inRange(value)) throw new IllegalArgumentException();
-        }
-
         Node<T> closest = find(value);
         int comparison = closest == null ? -1 : value.compareTo(closest.value);
         if (comparison == 0) {
@@ -55,9 +50,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return true;
     }
 
-    private boolean inRange(T value) {
-        return  value.compareTo(fromElement) >= 0 && value.compareTo(toElement) < 0;
-    }
     public boolean checkInvariant() {
         return root == null || checkInvariant(root);
     }
@@ -84,7 +76,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      *
      *
      * Сложность
-     * Время: O(n*log(n))
+     * Время: O(log(n))
      * Память: O(1)
      */
     @Override
@@ -180,7 +172,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Средняя
          *
          * Сложность
-         * Время: O(n)   n - число элементов в дереве
+         * Время: O(log(n))   n - число элементов в дереве
          * Память: O(1)
          */
         @Override
@@ -193,7 +185,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Средняя
          *
          * Сложность
-         * Время: O(n)   n - число элементов в дереве
+         * Время: O(log(n))   n - число элементов в дереве
          * Память: O(1)
          */
         @Override
@@ -209,7 +201,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          * Сложная
          *
          * Сложность
-         * Время: O(h)   h - высота дерева
+         * Время: O(n*log(n))   n - число элементов дерева
          * Память: O(1)
          */
         @Override
@@ -229,7 +221,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return size;
     }
 
-
     @Nullable
     @Override
     public Comparator<? super T> comparator() {
@@ -239,73 +230,106 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     /**
      * Для этой задачи нет тестов (есть только заготовка subSetTest), но её тоже можно решить и их написать
      * Очень сложная
+     *
+     * Сложность
+     * Время: O(1)
+     * Память: O(n)   n - количество элементов в дереве
      */
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        BinaryTree<T> tree = new BinaryTree<>();
-        tree.addAll(this);
-        tree.fromElement = fromElement;
-        tree.toElement = toElement;
-        for (T nodeValue : tree) {
-            if (nodeValue.compareTo(fromElement) < 0) {
-                tree.remove(nodeValue);
-            }
-            if (nodeValue.compareTo(toElement) >= 0){
-                tree.remove(nodeValue);
-            }
-        }
-        return tree;
+        return new SubBinaryTree(this, fromElement, toElement, true, true);
     }
 
-//    private class SubBinaryTree extends BinaryTree<T>{
-//
-//        BinaryTree<T> binaryTree;
-//        T fromElement;
-//        T toElement;
-//
-//        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement) {
-//            this.binaryTree = binaryTree;
-//            this.fromElement = fromElement;
-//            this.toElement = toElement;
-//        }
-//
-//        @Override
-//        public boolean remove(Object object) {
-//            return binaryTree.remove(object);
-//        }
-//
-//        @Override
-//        public boolean add(T value) {
-//            if (value.compareTo(fromElement) < 0 &&
-//                value.compareTo(toElement) >= 0) throw new IllegalArgumentException();
-//            return binaryTree.add(value);
-//        }
-//
-//
-//    }
+    private class SubBinaryTree extends BinaryTree<T>{
+        BinaryTree<T> binaryTree;
+        T fromElement;
+        T toElement;
+
+        boolean hasBottomLimit;
+        boolean hasTopLimit;
+
+        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement, boolean hasBottomLimit, boolean hasTopLimit ) {
+            this.binaryTree = binaryTree;
+            this.fromElement = fromElement;
+            this.toElement = toElement;
+            this.hasBottomLimit = hasBottomLimit;
+            this.hasTopLimit = hasTopLimit;
+        }
+
+        @Override
+        public boolean add(T value) {
+            if (!inRange(value)) throw new IllegalArgumentException();
+            return binaryTree.add(value);
+        }
+
+        @Override
+        public boolean remove (Object object) {
+            return binaryTree.remove(object);
+        }
+
+        @Override
+        public boolean contains(Object object) {
+            if (!inRange((T) object)) return false;
+            return binaryTree.contains(object);
+        }
+
+        @Override
+        public int size() {
+            int size = 0;
+            for (T value : binaryTree) {
+                if (inRange(value)) size++;
+            }
+            return size;
+        }
+
+        private boolean inRange(T value) {
+            /*
+             * Присваиваем
+             *
+             * compareWithBottom = 0
+             * compareWithTop = -1
+             *
+             * чтобы в методах tailSet() и headSet() не учитывать границы поддерева если
+             * hasBottomLimit = false или hasTopLimit = false
+             */
+            int compareWithBottom = 0;
+            int compareWithTop = -1;
+            if (hasBottomLimit) compareWithBottom = value.compareTo(fromElement);
+            if (hasTopLimit) compareWithTop = value.compareTo(toElement);
+            return  compareWithBottom >= 0 && compareWithTop < 0;
+        }
+    }
     /**
      * Найти множество всех элементов меньше заданного
      * Сложная
+     *
+     * Сложность
+     * Время: O(n)     n - число элементов главного дерева
+     * Память: O(n)    n - число элементов поддерева
      */
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
         //нужно составить множество из элементов, которые находятся в левом поддереве заданного элемента и из всех
         //элементов, идущих выше заданного элемента
-        // TODO
-        throw new NotImplementedError();
+        return new SubBinaryTree(this, null, toElement, false, true);
     }
 
     /**
      * Найти множество всех элементов больше или равных заданного
      * Сложная
+     *
+     * Сложность
+     * Время: O(n)     n - число элементов главного дерева
+     * Память: O(n)    n - число элементов поддерева
      */
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        // TODO
-        throw new NotImplementedError();
+        //нужно составить множество из элементов, которые находятся в правом поддереве заданного элемента и
+        //из данного элемента
+        return new SubBinaryTree(this, fromElement, null, true, false);
     }
 
     @Override
