@@ -80,7 +80,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Память: O(1)
      */
     @Override
-    public boolean remove(Object o) {
+    public boolean  remove(Object o) {
         if (find((T) o) ==  null) return false; //если элемент в дереве не найден, возвращаем false
         root = removeNode(root, new Node<>((T) o));
         size--;
@@ -285,8 +285,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
              * compareWithBottom = 0
              * compareWithTop = -1
              *
-             * чтобы в методах tailSet() и headSet() не учитывать границы поддерева если
-             * hasBottomLimit = false или hasTopLimit = false
+             * чтобы в методах tailSet() и headSet() не учитывать границы поддерева
              */
             int compareWithBottom = 0;
             int compareWithTop = -1;
