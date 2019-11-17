@@ -204,4 +204,70 @@ abstract class AbstractHeadTailTest {
         assertEquals(25, myTree.size)
     }
 
+    protected fun testSubBinaryTreeIterator(create: () -> CheckableSortedSet<Int>) {
+        val random = Random()
+        for (iteration in 1..1000) {
+            val list = mutableListOf<Int>()
+            for (i in 1..10) {
+                list.add(random.nextInt(1000))
+            }
+            val treeSet = TreeSet<Int>()
+            val binarySet = create()
+            assertFalse(
+                binarySet.subSet(0, 100).iterator().hasNext(),
+                "Iterator of empty set should not have next element"
+            )
+            for (element in list) {
+                treeSet += element
+                binarySet += element
+            }
+            val randomSize = random.nextInt(1000)
+            val treeIt = treeSet.subSet(0, randomSize).iterator()
+            val binaryIt = binarySet.subSet(0, randomSize).iterator()
+            println("Traversing $list")
+            while (treeIt.hasNext()) {
+                assertEquals(treeIt.next(), binaryIt.next(), "Incorrect iterator state while iterating $treeSet")
+            }
+            val iterator1 = binarySet.subSet(0, randomSize).iterator()
+            val iterator2 = binarySet.subSet(0, randomSize).iterator()
+            println("Consistency check for hasNext $list")
+            // hasNext call should not affect iterator position
+            while (iterator1.hasNext()) {
+                assertEquals(
+                    iterator2.next(), iterator1.next(),
+                    "Call of iterator.hasNext() changes its state while iterating $treeSet"
+                )
+            }
+        }
+    }
+
+    protected fun testSubBinaryTreeIteratorRemove(create: () -> CheckableSortedSet<Int>) {
+        val random = Random()
+        for (iteration in 1..100) {
+            val list = mutableListOf<Int>()
+            for (i in 1..10) {
+                list.add(random.nextInt(1000))
+            }
+            val treeSet = TreeSet<Int>()
+            val binarySet = create()
+            for (element in list) {
+                treeSet += element
+                binarySet += element
+            }
+            val toRemove = list[random.nextInt(list.size)] + 1  // +1 так как верхняя граница не учитывается
+            treeSet.subSet(0, toRemove).remove(toRemove)
+            println("Removing $toRemove from $list")
+            val iterator = binarySet.subSet(0, toRemove).iterator()
+            var counter = binarySet.subSet(0, toRemove).size
+            while (iterator.hasNext()) {
+                val element = iterator.next()
+                counter--
+                print("$element ")
+                if (element == toRemove) {
+                    iterator.remove()
+                }
+            }
+        }
+    }
+
 }
