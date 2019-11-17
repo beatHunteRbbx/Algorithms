@@ -8,7 +8,6 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
-
     private static class Node<T> {
         final T value;
 
@@ -155,29 +154,30 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public class BinaryTreeIterator implements Iterator<T> {
 
         private Node<T> currentNode = null;
-        private Deque<Node<T>> stack = new LinkedList<>();
+        private Node<T> previousNode = null;
+        private Stack<Node<T>> parentsStack = new Stack<>();
 
         private BinaryTreeIterator() {
             if (root == null) return;
-            createStack(root);
+            currentNode = root;
+            parentsStack.push(null);
+            while (currentNode.left != null) { //находим самый мнимальный элемент в дереве
+                parentsStack.push(currentNode);
+                currentNode = currentNode.left;
+            }
         }
 
-        private void createStack(Node<T> node) {
-            if (node.left != null) createStack(node.left);
-            stack.add(node);
-            if (node.right != null) createStack(node.right);
-        }
         /**
          * Проверка наличия следующего элемента
          * Средняя
          *
          * Сложность
-         * Время: O(log(n))   n - число элементов в дереве
+         * Время: O(1)
          * Память: O(1)
          */
         @Override
         public boolean hasNext() {
-            return stack.peek() != null;
+            return currentNode != null;
         }
 
         /**
@@ -190,12 +190,51 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            //достаем самый верхний элемент из стека
-            currentNode = stack.poll();
-            if (currentNode == null) throw new NoSuchElementException();
-            return currentNode.value;
+            previousNode = currentNode;
+            currentNode = findNext(currentNode);
+            return previousNode.value;
         }
 
+        private Node<T> findNext(Node<T> node) {
+            if (node.right != null) {
+                parentsStack.push(node);
+                return findMinNodeWithParents(node.right);
+            }
+            Node<T> parent = parentsStack.pop();
+            while (parent != null && node == parent.right) {
+                node = parent;
+                parent = parentsStack.pop();
+            }
+            return parent;
+        }
+
+        private Node<T> findNodeWithParents(Node<T> startNode, T value) {
+            if (value.compareTo(startNode.value) > 0){
+                parentsStack.push(startNode);
+                if (startNode.right == null) return startNode;
+                return findNodeWithParents(startNode.right, value);
+            }
+            else if (value.compareTo(startNode.value) < 0) {
+                parentsStack.push(startNode);
+                if (startNode.left == null) return startNode;
+                return findNodeWithParents(startNode.left, value);
+            }
+            else return startNode;
+        }
+
+        /*
+        В методе ищется мнимальный элемент в левом поддереве
+        И пока идет поиск все элементы до минимального (родители) помещаются в parentsStack
+         */
+        private Node<T> findMinNodeWithParents(Node<T> node) {
+            if (node == null) return null;
+            Node<T> currentNode = node;
+            while (currentNode.left != null) {
+                parentsStack.push(currentNode);
+                currentNode = currentNode.left;
+            }
+            return currentNode;
+        }
         /**
          * Удаление следующего элемента
          * Сложная
@@ -206,7 +245,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            BinaryTree.this.remove(currentNode.value);
+            BinaryTree.this.remove(previousNode.value);
+            while (!parentsStack.empty()) parentsStack.pop();
+            parentsStack.push(null); //чтобы не вылетал EmptyStackException
+            if (currentNode == null) return;
+            currentNode = findNodeWithParents(root, currentNode.value);
         }
     }
 
@@ -257,6 +300,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             this.hasTopLimit = hasTopLimit;
         }
 
+
         @Override
         public boolean add(T value) {
             if (!inRange(value)) throw new IllegalArgumentException();
@@ -298,6 +342,89 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             if (hasBottomLimit) compareWithBottom = value.compareTo(fromElement);
             if (hasTopLimit) compareWithTop = value.compareTo(toElement);
             return  compareWithBottom >= 0 && compareWithTop < 0;
+        }
+
+        @NotNull
+        @Override
+        public Iterator<T> iterator() { return new SubBinaryTreeIterator(); }
+
+        public class SubBinaryTreeIterator extends BinaryTreeIterator {
+
+            private Node<T> currentNode = null;
+            private Node<T> previousNode = null;
+            private Stack<Node<T>> parentsStack = new Stack<>();
+
+            private SubBinaryTreeIterator() {
+                if (root == null) return;
+                currentNode = root;
+                parentsStack.push(null);
+                while (currentNode.left != null) { //находим самый мнимальный элемент в дереве
+                    parentsStack.push(currentNode);
+                    currentNode = currentNode.left;
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                return currentNode != null && inRange(currentNode.value);
+            }
+
+            @Override
+            public T next() {
+                previousNode = currentNode;
+                currentNode = findNext(currentNode);
+                return previousNode.value;
+            }
+
+            private Node<T> findNext(Node<T> node) {
+                if (node.right != null) {
+                    parentsStack.push(node);
+                    return findMinNodeWithParents(node.right);
+                }
+                Node<T> parent = parentsStack.pop();
+                while (parent != null && node == parent.right) {
+                    node = parent;
+                    parent = parentsStack.pop();
+                }
+                return parent;
+            }
+
+            private Node<T> findNodeWithParents(Node<T> startNode, T value) {
+                if (value.compareTo(startNode.value) > 0){
+                    parentsStack.push(startNode);
+                    if (startNode.right == null) return startNode;
+                    return findNodeWithParents(startNode.right, value);
+                }
+                else if (value.compareTo(startNode.value) < 0) {
+                    parentsStack.push(startNode);
+                    if (startNode.left == null) return startNode;
+                    return findNodeWithParents(startNode.left, value);
+                }
+                else return startNode;
+            }
+
+            /*
+            В методе ищется мнимальный элемент в левом поддереве
+            И пока идет поиск все элементы до минимального (родители) помещаются в parentsStack
+             */
+            private Node<T> findMinNodeWithParents(Node<T> node) {
+                if (node == null) return null;
+                Node<T> currentNode = node;
+                while (currentNode.left != null) {
+                    parentsStack.push(currentNode);
+                    currentNode = currentNode.left;
+                }
+                return currentNode;
+            }
+
+            @Override
+            public void remove() {
+                BinaryTree.this.remove(previousNode.value);
+                while (!parentsStack.empty()) parentsStack.pop();
+                parentsStack.push(null); //чтобы не вылетал EmptyStackException
+                if (currentNode == null) return;
+                currentNode = findNodeWithParents(root, currentNode.value);
+            }
         }
     }
     /**
