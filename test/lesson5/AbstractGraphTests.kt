@@ -2,7 +2,6 @@ package lesson5
 
 import lesson5.impl.GraphBuilder
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 abstract class AbstractGraphTests {
@@ -244,67 +243,75 @@ abstract class AbstractGraphTests {
             cross.largestIndependentVertexSet()
         )
 
-        val myGraph = GraphBuilder().apply {
-            val a = addVertex("A")
-            val b = addVertex("B")
-            val c = addVertex("C")
-            val d = addVertex("D")
-            val e = addVertex("E")
-            val f = addVertex("F")
-            addConnection(a, b)
-            addConnection(b, c)
-            addConnection(c, d)
-            addConnection(d, e)
-            addConnection(e, f)
-        }.build()
-        assertEquals(
-            setOf(myGraph["A"], myGraph["C"], myGraph["E"]),
-            myGraph.largestIndependentVertexSet()
-        )
 
-        val myGraph1 = GraphBuilder().apply {
-            val a = addVertex("A")
-            val b = addVertex("B")
-            val c = addVertex("C")
-            val d = addVertex("D")
-            val e = addVertex("E")
-            val f = addVertex("F")
-            val g = addVertex("G")
-            addConnection(a, b)
-            addConnection(b, c)
-            addConnection(b, d)
-            addConnection(d, e)
-            addConnection(d, g)
-            addConnection(e, f)
-            addConnection(f, g)
-        }.build()
-        assertEquals(
-            setOf(myGraph1["A"], myGraph1["C"], myGraph1["D"], myGraph1["F"]),
-            myGraph1.largestIndependentVertexSet()
-        )
-
-        val myGraph2 = GraphBuilder().apply {
-            val a = addVertex("A")
-            val b = addVertex("B")
-            val c = addVertex("C")
-            val d = addVertex("D")
-            val e = addVertex("E")
-            val f = addVertex("F")
-            val g = addVertex("G")
-            val h = addVertex("H")
-            addConnection(a, b)
-            addConnection(b, c)
-            addConnection(c, d)
-            addConnection(b, e)
-            addConnection(e, f)
-            addConnection(b, g)
-            addConnection(g, h)
-        }.build()
-        assertEquals(
-            setOf(myGraph2["A"], myGraph2["C"], myGraph2["G"], myGraph2["E"]),
-            myGraph2.largestIndependentVertexSet()
-        )
-
+//        //    A           E
+//        //    |           |
+//        //    B --- C --- D
+//        //    |           |
+//        //    H --- G --- F
+//        //    |           |
+//        //    I --- J --- K
+//        //    |           |
+//        //    N --- M --- L
+//        //    |           |
+//        //    O --- P --- Q
+//        //    |           |
+//        //    T --- S --- R
+//        //    |           |
+//        //    U           V
+//        val stairs = GraphBuilder().apply {
+//            val a = addVertex("A")
+//            val b = addVertex("B")
+//            val c = addVertex("C")
+//            val d = addVertex("D")
+//            val e = addVertex("E")
+//            val f = addVertex("F")
+//            val g = addVertex("G")
+//            val h = addVertex("H")
+//            val i = addVertex("I")
+//            val j = addVertex("J")
+//            val k = addVertex("K")
+//            val l = addVertex("L")
+//            val m = addVertex("M")
+//            val n = addVertex("N")
+//            val o = addVertex("O")
+//            val p = addVertex("P")
+//            val q = addVertex("Q")
+//            val r = addVertex("R")
+//            val s = addVertex("S")
+//            val t = addVertex("T")
+//            val u = addVertex("U")
+//            val v = addVertex("V")
+//            addConnection(a, b)
+//            addConnection(b, c)
+//            addConnection(c, d)
+//            addConnection(d, e)
+//            addConnection(d, f)
+//            addConnection(f, g)
+//            addConnection(g, h)
+//            addConnection(h, b)
+//            addConnection(h, i)
+//            addConnection(i, j)
+//            addConnection(j, k)
+//            addConnection(k, f)
+//            addConnection(k, l)
+//            addConnection(l, m)
+//            addConnection(m, n)
+//            addConnection(n, i)
+//            addConnection(n, o)
+//            addConnection(o, p)
+//            addConnection(p, q)
+//            addConnection(q, l)
+//            addConnection(q, r)
+//            addConnection(r, v)
+//            addConnection(r, s)
+//            addConnection(s, t)
+//            addConnection(t, o)
+//            addConnection(t, u)
+//        }.build()
+//        assertFailsWith<IllegalArgumentException> {
+//            stairs.largestIndependentVertexSet()
+//        }
     }
 
     fun longestSimplePath(longestSimplePath: Graph.() -> Path) {
