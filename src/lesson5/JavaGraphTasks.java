@@ -94,36 +94,33 @@ public class JavaGraphTasks {
      *
      * Эта задача может быть зачтена за пятый и шестой урок одновременно
      */
-    public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
+    private static Map<Graph.Vertex, Boolean> visitedVerticesMap = new HashMap<>();
 
-        Map<Graph.Vertex, Boolean> visitedVerticesMap = new HashMap<>();
+    public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
         for (Graph.Vertex vertex : graph.getVertices()) visitedVerticesMap.put(vertex, false);
 
-
-
         Set<Graph.Vertex> independentVerticesSet = new HashSet<>();
-        Deque<Graph.Vertex> arrVertices = new LinkedList<>(graph.getVertices()); //K
-        Deque<Graph.Vertex> independentVertexList = new LinkedList<>();          //M
-        Deque<Graph.Vertex> visitedVerticesList = new LinkedList<>();            //P
+        Deque<Graph.Vertex> arrVertices = new LinkedList<>(graph.getVertices()); //K - множество кандидатов
+        Deque<Graph.Vertex> independentVertexList = new LinkedList<>();          //M - возможное независимое множество
+//        Deque<Graph.Vertex> visitedVerticesList = new LinkedList<>();            //P
         Deque<Graph.Vertex> verticesList = new LinkedList<>();
 
         //поиск циклов в графе
-//        if (!graph.getVertices().isEmpty()) loopSearch(graph, arrVertices.getFirst(), visitedVerticesMap);
+        if (!graph.getVertices().isEmpty()) loopSearch(graph, arrVertices.getFirst(), visitedVerticesMap);
 
         //Алгоритм Брона-Кербоша
         while(!arrVertices.isEmpty() || !independentVertexList.isEmpty()) {
-            Graph.Vertex vertex = null;
-            if (!arrVertices.isEmpty()) { //пока множество кандидатов не пустое
-                vertex = arrVertices.getFirst(); //берем вершину из множества кадидатов
-                independentVertexList.offer(vertex); //помещаем её в возможное независимое множество
-                for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) arrVertices.remove(neighbour); //удаляем из множества кандидатов всех соседей вершины vertex
-                arrVertices.remove(vertex); //удаляем саму вершину vertex из множества кандидатов
+            if (!arrVertices.isEmpty()) {
+                Graph.Vertex vertex = arrVertices.getFirst();
+                independentVertexList.offer(vertex);
+                for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) arrVertices.remove(neighbour);
+                arrVertices.remove(vertex);
 //                for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) visitedVerticesList.remove(neighbour);
             }
-            else {  //если множество кандидатов пустое
+            else {
 //                if (visitedVerticesList.isEmpty()) {
-                independentVerticesSet.addAll(independentVertexList); //преобразуем List независимых вершин в Set
-                independentVertexList.clear();  //очищаем List для дальнейшего нового составления
+                independentVerticesSet.addAll(independentVertexList);
+                independentVertexList.clear();
 //                }
 //                arrVertices.remove(vertex);
 //                visitedVerticesList.offer(vertex);
@@ -132,21 +129,23 @@ public class JavaGraphTasks {
         return independentVerticesSet;
     }
 
-    static void loopSearch(Graph graph, Graph.Vertex vertex, Map<Graph.Vertex, Boolean> visitedVerticesMap) {
-        boolean hasLoop = false;
-        List<Graph.Vertex> arrVertices = new ArrayList<>(graph.getVertices());
-
-        visitedVerticesMap.put(vertex, true);
-
-        Set<Graph.Vertex> visitedNeighbours = new HashSet<>();
+    private static void loopSearch(Graph graph, Graph.Vertex vertex, Map<Graph.Vertex, Boolean> visitedVerticesMap) {
+//        List<Graph.Vertex> arrVertices = new ArrayList<>(graph.getVertices());
+        visit(vertex);
+        //добавить Set уже обработанных вершин (т.е. у вершины были посещены все соседи)
+        Set<Graph.Vertex> verticesWithAllVisitedNeighbours = new HashSet<>();
         for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) {
-            if (visitedVerticesMap.get(neighbour) == true) visitedNeighbours.add(neighbour);
-            else loopSearch(graph, neighbour, visitedVerticesMap);
+           if (!visitedVerticesMap.get(neighbour)) {
+               verticesWithAllVisitedNeighbours.add(vertex);
+               loopSearch(graph, neighbour, visitedVerticesMap);
+           }
         }
-        if (visitedNeighbours.equals(graph.getNeighbors(vertex)) && visitedNeighbours.size() > 1) hasLoop = true;
-        if (hasLoop) throw new IllegalArgumentException();
     }
 
+    private static void visit(Graph.Vertex vertex) {
+        if (visitedVerticesMap.get(vertex)) throw new IllegalArgumentException();
+        else visitedVerticesMap.put(vertex, true);
+    }
     /**
      * Наидлиннейший простой путь.
      * Сложная
