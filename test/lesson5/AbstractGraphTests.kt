@@ -2,6 +2,7 @@ package lesson5
 
 import lesson5.impl.GraphBuilder
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 abstract class AbstractGraphTests {
@@ -241,6 +242,67 @@ abstract class AbstractGraphTests {
         assertEquals(
             setOf(cross["A"], cross["B"], cross["C"], cross["D"]),
             cross.largestIndependentVertexSet()
+        )
+
+        val myGraph = GraphBuilder().apply {
+            val a = addVertex("A")
+            val b = addVertex("B")
+            val c = addVertex("C")
+            val d = addVertex("D")
+            val e = addVertex("E")
+            val f = addVertex("F")
+            addConnection(a, b)
+            addConnection(b, c)
+            addConnection(c, d)
+            addConnection(d, e)
+            addConnection(e, f)
+        }.build()
+        assertEquals(
+            setOf(myGraph["A"], myGraph["C"], myGraph["E"]),
+            myGraph.largestIndependentVertexSet()
+        )
+
+        val myGraph1 = GraphBuilder().apply {
+            val a = addVertex("A")
+            val b = addVertex("B")
+            val c = addVertex("C")
+            val d = addVertex("D")
+            val e = addVertex("E")
+            val f = addVertex("F")
+            val g = addVertex("G")
+            addConnection(a, b)
+            addConnection(b, c)
+            addConnection(b, d)
+            addConnection(d, e)
+            addConnection(d, g)
+            addConnection(e, f)
+            addConnection(f, g)
+        }.build()
+        assertEquals(
+            setOf(myGraph1["A"], myGraph1["C"], myGraph1["D"], myGraph1["F"]),
+            myGraph1.largestIndependentVertexSet()
+        )
+
+        val myGraph2 = GraphBuilder().apply {
+            val a = addVertex("A")
+            val b = addVertex("B")
+            val c = addVertex("C")
+            val d = addVertex("D")
+            val e = addVertex("E")
+            val f = addVertex("F")
+            val g = addVertex("G")
+            val h = addVertex("H")
+            addConnection(a, b)
+            addConnection(b, c)
+            addConnection(c, d)
+            addConnection(b, e)
+            addConnection(e, f)
+            addConnection(b, g)
+            addConnection(g, h)
+        }.build()
+        assertEquals(
+            setOf(myGraph2["A"], myGraph2["C"], myGraph2["G"], myGraph2["E"]),
+            myGraph2.largestIndependentVertexSet()
         )
     }
 
