@@ -304,6 +304,7 @@ abstract class AbstractGraphTests {
             setOf(myGraph2["A"], myGraph2["C"], myGraph2["G"], myGraph2["E"]),
             myGraph2.largestIndependentVertexSet()
         )
+
     }
 
     fun longestSimplePath(longestSimplePath: Graph.() -> Path) {
