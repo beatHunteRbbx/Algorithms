@@ -93,20 +93,28 @@ public class JavaGraphTasks {
      * Если на входе граф с циклами, бросить IllegalArgumentException
      *
      * Эта задача может быть зачтена за пятый и шестой урок одновременно
+     *
+     * Сложность
+     * Время: O(n^2)   n - число вершин в графе
+     * Память: O(k)    k - все возможные независимые множества вершин графа
      */
-    private static Map<Graph.Vertex, Boolean> visitedVerticesMap = new HashMap<>();
+
 
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
-        for (Graph.Vertex vertex : graph.getVertices()) visitedVerticesMap.put(vertex, false);
+        Set<Graph.Vertex> beingExploredVerticesSet = new HashSet<>();
+
 
         Set<Graph.Vertex> independentVerticesSet = new HashSet<>();
-        Deque<Graph.Vertex> arrVertices = new LinkedList<>(graph.getVertices()); //K - множество кандидатов
-        Deque<Graph.Vertex> independentVertexList = new LinkedList<>();          //M - возможное независимое множество
-//        Deque<Graph.Vertex> visitedVerticesList = new LinkedList<>();            //P
+        Deque<Graph.Vertex> arrVertices = new LinkedList<>(graph.getVertices()); //множество кандидатов
+        Deque<Graph.Vertex> independentVertexList = new LinkedList<>();          //возможное независимое множество
         Deque<Graph.Vertex> verticesList = new LinkedList<>();
 
         //поиск циклов в графе
-        if (!graph.getVertices().isEmpty()) loopSearch(graph, arrVertices.getFirst(), visitedVerticesMap);
+        if (!graph.getVertices().isEmpty()) {
+            loopSearch( graph,
+                        arrVertices.getFirst(),
+                        beingExploredVerticesSet );
+        }
 
         //Алгоритм Брона-Кербоша
         while(!arrVertices.isEmpty() || !independentVertexList.isEmpty()) {
@@ -115,36 +123,29 @@ public class JavaGraphTasks {
                 independentVertexList.offer(vertex);
                 for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) arrVertices.remove(neighbour);
                 arrVertices.remove(vertex);
-//                for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) visitedVerticesList.remove(neighbour);
             }
             else {
-//                if (visitedVerticesList.isEmpty()) {
                 independentVerticesSet.addAll(independentVertexList);
                 independentVertexList.clear();
-//                }
-//                arrVertices.remove(vertex);
-//                visitedVerticesList.offer(vertex);
             }
         }
         return independentVerticesSet;
     }
 
-    private static void loopSearch(Graph graph, Graph.Vertex vertex, Map<Graph.Vertex, Boolean> visitedVerticesMap) {
-//        List<Graph.Vertex> arrVertices = new ArrayList<>(graph.getVertices());
-        visit(vertex);
-        //добавить Set уже обработанных вершин (т.е. у вершины были посещены все соседи)
-        Set<Graph.Vertex> verticesWithAllVisitedNeighbours = new HashSet<>();
-        for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) {
-           if (!visitedVerticesMap.get(neighbour)) {
-               verticesWithAllVisitedNeighbours.add(vertex);
-               loopSearch(graph, neighbour, visitedVerticesMap);
-           }
-        }
-    }
+    private static void loopSearch( Graph graph,
+                                    Graph.Vertex vertex,
+                                    Set<Graph.Vertex> beingExploredVerticesSet ) {
 
-    private static void visit(Graph.Vertex vertex) {
-        if (visitedVerticesMap.get(vertex)) throw new IllegalArgumentException();
-        else visitedVerticesMap.put(vertex, true);
+        for (Graph.Edge edge : graph.getEdges()) {
+            Graph.Vertex begin = edge.getBegin();
+            Graph.Vertex end = edge.getEnd();
+            if (    beingExploredVerticesSet.contains(begin) && beingExploredVerticesSet.contains(end) ||
+                    begin.equals(end)   ) {
+                throw new IllegalArgumentException();
+            }
+            beingExploredVerticesSet.add(begin);
+            beingExploredVerticesSet.add(end);
+        }
     }
     /**
      * Наидлиннейший простой путь.
@@ -165,6 +166,10 @@ public class JavaGraphTasks {
      * J ------------ K
      *
      * Ответ: A, E, J, K, D, C, H, G, B, F, I
+     *
+     * Сложность
+     * Время: O(n*k)     n - количество всех путей в графе (pathDeque.size()), k - количество соседей у каждой вершины
+     * Память: O(n)      n - количество всех путей в графе (pathDeque.size())
      */
     public static Path longestSimplePath(Graph graph) {
         Path longestPath = new Path();
@@ -173,21 +178,11 @@ public class JavaGraphTasks {
         //составляем все возможные начала путей в графе
         for (Graph.Vertex vertex : graph.getVertices()) pathDeque.offer(new Path(vertex));
         while (!pathDeque.isEmpty()) {
-
             //поочередно вытаскиваем пути, для дальнейшего их дополнения
             Path path = pathDeque.poll();
-
             for (Graph.Vertex neighbor : graph.getNeighbors(path.getVertices().get(path.getLength()))) {
-
                 //дополняем пути и помещаем их в pathDeque
                 if (!path.contains(neighbor)) pathDeque.offer(new Path(path, graph, neighbor));
-//                if (path.getVertices().contains(edge.getBegin())) break;
-//                if (edge.getBegin() != vertex) {
-//                    pathDeque.offer(edge.getBegin());
-//                }
-//                if (edge.getEnd() != vertex) {
-//                    pathDeque.offer(edge.getEnd());
-//                }
             }
 
             if (path.getLength() > maxLength) {
